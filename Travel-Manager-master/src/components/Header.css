@@ -1,41 +1,93 @@
 .header {
   position: relative;
   text-align: center;
-  padding: 40px;
+  padding: 20px;
 }
 
-/* Buton pozitionat in stanga sus */
-.leftBtn {
+/* Zona centrala cu logo */
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Logo */
+.logo {
+  width: 800px;
+  max-width: 80%;
+  margin-bottom: 2px;
+}
+
+/* Buton meniu stanga */
+.menuContainer {
   position: absolute;
   left: 20px;
   top: 20px;
 }
 
-/* Buton pozitionat in dreapta sus */
+/* Butoane dreapta */
 .rightBtn {
   position: absolute;
   right: 20px;
   top: 20px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-/* Container central pentru titlu si descriere */
-.center h1 {
-  margin: 0;
-}
-
-/* Stil pentru textul descriptiv */
-.center p {
-  color: gray;
-}
-
-/* stil pentru text user */
-.userText {
-  font-size: 14px;
-  color: #333;
-}
-
-/* stil general pentru butoane */
-.rightBtn button {
+/* Stil general pentru butoane */
+.rightBtn button,
+.leftBtn,
+.dropdownMenu button {
   padding: 6px 10px;
   cursor: pointer;
+}
+
+/* Dropdown menu */
+.dropdownMenu {
+  position: absolute;
+  top: 35px;
+  left: 0;
+
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.dropdownMenu button {
+  background: none;
+  border: none;
+  text-align: left;
+}
+
+.dropdownMenu button:hover {
+  background: #f0f0f0;
+}
+
+/* User login box */
+.userBox {
+  background: #eef7ff;
+  padding: 5px 10px;
+  border-radius: 20px;
+
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.userName {
+  font-weight: 600;
+  color: #007bff;
 }

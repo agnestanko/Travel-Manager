@@ -13,13 +13,12 @@ function AttractionDetails() {
 
   const user = getCurrentUser();
 
+  //Input pentru BuyTicketForm -> functii handle -> implementare logica in backend; POST /api/Tickets; calc total Price=price+profit?
   const [formData, setFormData] = useState({
     fullName: user?.name || "",
     email: user?.email || "",
-    phoneNumber: "",
     tickets: 1,
-    paymentMethod: "",
-    notes: ""
+    entryDate: ""
   });
 
   useEffect(() => {
@@ -32,11 +31,11 @@ function AttractionDetails() {
         }
 
         const data = await response.json();
-        const found = data.find(item => item.id === Number(id));
+        const found = data.find((item) => item.id === Number(id));
 
         setAttraction(found);
       } catch (error) {
-        console.error("Eroare la incarcarea atractiei:", error);
+        console.error("Error loading attraction:", error);
       }
     };
 
@@ -45,57 +44,76 @@ function AttractionDetails() {
 
   if (!attraction) return <p>Attraction not found.</p>;
 
+  const price = Number(attraction.entryPrice) || 0;
+  const totalPrice = price * Number(formData.tickets);
+
   const handleChange = (e) => {
+    const { name, value } = e.target;
+
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: name === "tickets" ? Number(value) : value
     });
   };
 
-  const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleBuyTicket = () => {
+    if (!isLoggedIn()) {
+      navigate("/auth");
+      return;
+    }
 
-  const orderData = {
-    ...formData,
-    attractionId: Number(id)
+    setShowModal(true);
   };
 
-  console.log("ORDER DATA:", orderData);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  alert("Ticket reserved");
-  setShowModal(false);
-};
-// Daca este endpoint in partea backend
-/* const response = await fetch(`${API_URL}/api/Tickets`, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify(orderData)
-}); */
+    // Data prepared for backend
+    const orderData = {
+      fullName: formData.fullName,
+      email: formData.email,
+      attractionId: Number(id),
+      tickets: formData.tickets,
+      price: price,
+      totalPrice: totalPrice,
+      entryDate: formData.entryDate
+    };
 
- const handleBuyTicket = () => {
-  if (!isLoggedIn()) {
-    navigate("/auth");
-    return;
-  }
-  setShowModal(true);
-};
+    console.log("ORDER DATA:", orderData);
+
+    alert("Ticket reserved");
+    setShowModal(false);
+
+    // Use this later when backend endpoint is ready
+    /*
+    const response = await fetch(`${API_URL}/api/Tickets`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      },
+      body: JSON.stringify(orderData)
+    });
+
+    if (response.ok) {
+      alert("Ticket reserved successfully");
+      setShowModal(false);
+    } else {
+      alert("Ticket reservation failed");
+    }
+    */
+  };
 
   return (
     <div className="details-container">
-      <button onClick={() => navigate(-1)}>
-        Back
-      </button>
+      <button onClick={() => navigate(-1)}>Back</button>
 
       <h1>{attraction.name}</h1>
       <p>{attraction.location}</p>
       <p>{attraction.description}</p>
-      <p>{attraction.entryPrice} RON</p>
+      <p>{price} RON</p>
 
-      <button onClick={handleBuyTicket}>
-        Buy ticket
-      </button>
+      <button onClick={handleBuyTicket}>Buy ticket</button>
 
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
@@ -120,14 +138,16 @@ function AttractionDetails() {
                 required
               />
 
+              <label>Entry date</label>
               <input
-                name="phoneNumber"
-                placeholder="Phone number"
-                value={formData.phoneNumber}
+                type="date"
+                name="entryDate"
+                value={formData.entryDate}
                 onChange={handleChange}
                 required
               />
 
+              <label>Number of tickets</label>
               <input
                 type="number"
                 name="tickets"
@@ -137,32 +157,18 @@ function AttractionDetails() {
                 required
               />
 
-              <select
-                name="paymentMethod"
-                value={formData.paymentMethod}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select payment method</option>
-                <option value="card">Card</option>
-                <option value="cash">Cash</option>
-              </select>
+              <label>Price</label>
+              <input value={`${price} RON`} readOnly />
 
-              <textarea
-                name="notes"
-                placeholder="Additional notes"
-                value={formData.notes}
-                onChange={handleChange}
-              />
+              <label>Total price</label>
+              <input value={`${totalPrice} RON`} readOnly />
 
-              <button type="submit">
-                Confirm purchase
-              </button>
+              <button type="submit">Confirm purchase</button>
+              <p className="paymentInfo">
+                Card only payment
+              </p>
 
-              <button
-                type="button"
-                onClick={() => setShowModal(false)}
-              >
+              <button type="button" onClick={() => setShowModal(false)}>
                 Cancel
               </button>
             </form>

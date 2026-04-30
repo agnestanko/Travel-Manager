@@ -15,7 +15,7 @@
 
 /* Input cautare */
 .input {
-  width: 300px;
+  width: 570px;
   padding: 10px;
   border-radius: 10px;
   border: 1px solid #ccc;
@@ -141,27 +141,7 @@
   animation: fadeIn 0.3s ease-in;
 }
 
-.noResultsMessage h3 {
-  margin: 0 0 5px 0;
-  color: #343a40;
-  font-size: 18px;
-}
 
-.resultsWrapper {
-  width: 900px;
-  height: 400px; 
-  overflow-y: auto;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-  margin-top: 20px;
-}
-
-.resultsList {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
 
 /* Animatie aparitie cu slide usor de sus */
 @keyframes fadeIn {

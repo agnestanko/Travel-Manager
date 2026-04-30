@@ -1,4 +1,3 @@
-import Header from "../components/Header";
 import SearchBar from "../components/SearchBar";
 import ResultsList from "../components/ResultsList";
 
@@ -15,8 +14,6 @@ function Home() {
 
   return (
     <div>
-      <Header />
-
       {/* Container principal pentru cautare si rezultate */}
       <div style={styles.container}>
         

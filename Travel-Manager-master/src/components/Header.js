@@ -1,55 +1,81 @@
 import "./Header.css";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { isLoggedIn, logout, getCurrentUser } from "../services/authService";
+import logo from "../assets/logo_header.png"; // importa logo (pune imaginea in /src/assets/logo.png)
 
-/**
- * Componenta Header
- * Afiseaza titlul aplicatiei si butoanele principale (menu + login)
- */
 function Header() {
   const navigate = useNavigate();
+  const [showMenu, setShowMenu] = useState(false);
 
-  // verificare daca userul este logat
   const loggedIn = isLoggedIn();
   const user = getCurrentUser();
 
-  // functie pentru logout
   const handleLogout = () => {
     logout();
-    navigate("/auth")
+    navigate("/auth");
   };
 
   return (
-    <div className="header">
+      <div className="header">
 
-      {/* Buton pentru meniu (stanga) */}
-      <button className="leftBtn">Menu</button>
+         {/* MENU BUTTON */}
+      <div className="menuContainer">
+        <button
+          className="leftBtn"
+          onClick={() => setShowMenu(!showMenu)}
+        >
+          Menu
+        </button>
 
-      {/* Sectiune centrala cu titlu si descriere */}
-      <div className="center">
-        <h1>Event Finder</h1>
-        <p>Find your perfect experience</p>
+        {/* DROPDOWN MENU */}
+        {showMenu && (
+          <div className="dropdownMenu">
+
+            <button onClick={
+              () => {navigate("/");
+              setShowMenu(false);
+            }}>
+              Home
+            </button>
+
+            {/* DOAR daca e logat */}
+            {loggedIn && (
+              <button onClick={() => {
+                navigate("/profile");
+                setShowMenu(false);
+              }}>
+                My Profile
+              </button>
+            )}
+
+          </div>
+        )}
       </div>
 
-      {/* Buton pentru autentificare (dreapta) */}
+      {/* Zona centrala */}
+      <div className="center">
+
+        {/* Logo */}
+        <img src={logo} alt="logo" className="logo" />
+
+      </div>
+
+      {/* Dreapta */}
       <div className="rightBtn">
 
-        {/* daca NU este logat */}
         {!loggedIn && (
-          <>
-            <button onClick={() => navigate("/auth")}>
-              Login / Register
-            </button>
-          </> 
+          <button onClick={() => navigate("/auth")}>
+            Login / Register
+          </button>
         )}
 
-        {/* daca ESTE logat */}
         {loggedIn && (
           <>
-            {/* afisam numele daca exista */}
-            <span className="userText">
-              {user?.name ? `Hello, ${user.name}` : "User"}
-            </span>
+            <div className="userBox">
+              <span>👤</span>
+              <span className="userName">{user?.name || "User"}</span>
+            </div>
 
             <button onClick={handleLogout}>
               Logout
@@ -58,7 +84,6 @@ function Header() {
         )}
 
       </div>
-
     </div>
   );
 }

@@ -1,15 +1,15 @@
 .auth-container {
-  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #f4f4f4;
+  background-color: white;
+  padding: 20px;
 }
 
 .auth-form {
-  width: 320px;
+  width: 750px;
   padding: 25px;
-  background-color: white;
+  background-color: #f4f4f4;
   border-radius: 8px;
   display: flex;
   flex-direction: column;

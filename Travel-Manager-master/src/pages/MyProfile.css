@@ -1,0 +1,38 @@
+.profile-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+.profile-title {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.profile-section {
+  background: white;
+  padding: 20px;
+  margin-top: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.back-btn {
+  margin-bottom: 10px;
+}
+
+.edit-btn {
+  margin-top: 10px;
+}
+
+.ticket-card {
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 8px;
+  margin: 10px 0;
+  background: #fafafa;
+}
+
+.ticket-card.expired {
+  opacity: 0.6;
+}

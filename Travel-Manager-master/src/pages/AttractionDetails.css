@@ -61,13 +61,13 @@
   background: white;
   padding: 20px;
   border-radius: 10px;
-  width: 300px;
+  width: 400px;
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
 }
 
 .form input {
@@ -79,4 +79,14 @@
 .form button {
   padding: 8px;
   cursor: pointer;
+}
+
+.paymentInfo {
+  background: #eef7ff;
+  color: #007bff;
+  padding: 4px;
+  border-radius: 1px;
+  text-align: center;
+  font-size: 14px;
+  margin-bottom: 4px;
 }
