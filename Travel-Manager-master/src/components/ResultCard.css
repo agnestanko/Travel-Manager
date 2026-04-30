@@ -63,16 +63,22 @@
   padding: 20px 25px;
   margin-top: 20px;
   animation: fadeIn 0.3s ease-in;
+   height: 100%;  
 }
 
 .resultsWrapper {
   width: 1200px;
-  height: 600px; 
-  overflow-y: auto;
+  min-height: 400px;              
+  overflow-y: auto;           
   background: white;
   border-radius: 12px;
   box-shadow: 0 10px 20px rgba(0,0,0,0.1);
   margin-top: 20px;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;    
+  overflow-y: auto;
 }
 
 .resultsList {

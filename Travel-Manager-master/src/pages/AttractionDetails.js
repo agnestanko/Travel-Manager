@@ -3,6 +3,12 @@ import { useEffect, useState } from "react";
 import "./AttractionDetails.css";
 import { isLoggedIn, getCurrentUser } from "../services/authService";
 import { API_URL } from "../services/api";
+import ImageGallery from "../components/ImageGallery";
+
+// Imagini temporale: Backend
+import img1 from "../assets/gallery1.jpeg";
+import img2 from "../assets/gallery2.jpeg";
+import img3 from "../assets/gallery3.jpeg";
 
 function AttractionDetails() {
   const { id } = useParams();
@@ -10,8 +16,13 @@ function AttractionDetails() {
 
   const [attraction, setAttraction] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  //const [availableDates, setAvailableDates] = useState([]);
+  //const [unavailableDates, setUnavailableDates] = useState([]);
+  //PAS 3 (viitor)-> calendar custom (highlight zile)
 
   const user = getCurrentUser();
+
+  const attractionImages = [img1, img2, img3];
 
   //Input pentru BuyTicketForm -> functii handle -> implementare logica in backend; POST /api/Tickets; calc total Price=price+profit?
   const [formData, setFormData] = useState({
@@ -44,8 +55,26 @@ function AttractionDetails() {
 
   if (!attraction) return <p>Attraction not found.</p>;
 
+  /*
+useEffect(() => {
+  const fetchDates = async () => {
+    const response = await fetch(`${API_URL}/api/Attractions/${id}/available-dates`);
+
+    if (response.ok) {
+      const data = await response.json();
+      setAvailableDates(data.availableDates);
+      setUnavailableDates(data.unavailableDates);
+    }
+  };
+
+  fetchDates();
+}, [id]);
+*/
+
   const price = Number(attraction.entryPrice) || 0;
   const totalPrice = price * Number(formData.tickets);
+
+  //const attractionImages = [img1, img2, img3];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -104,16 +133,54 @@ function AttractionDetails() {
     */
   };
 
+  const relatedAttractions = [
+    { id: 2, title: "Adventure Park", image: img2 },
+    { id: 3, title: "City Experience", image: img3 },
+    { id: 1, title: "Aquapark Nymphaea", image: img1 }
+  ];
+
   return (
     <div className="details-container">
-      <button onClick={() => navigate(-1)}>Back</button>
+        <div className="details-page">
+          <div className="details-layout">
 
-      <h1>{attraction.name}</h1>
-      <p>{attraction.location}</p>
-      <p>{attraction.description}</p>
-      <p>{price} RON</p>
+            {/* GALERIE STANGA */}
+            <div className="details-gallery">
+              <ImageGallery images={attractionImages} />
+            </div>
 
-      <button onClick={handleBuyTicket}>Buy ticket</button>
+            {/* DETALII DREAPTA */}
+            <div className="details-info">
+              <button onClick={() => navigate(-1)}>Back</button>
+
+              <h1>{attraction.name}</h1>
+              <p>{attraction.location}</p>
+              <p>{attraction.description}</p>
+              <p>{price} RON</p>
+
+              <button onClick={handleBuyTicket}>
+                Buy ticket
+              </button>
+            </div>
+
+          </div>
+
+          <aside className="related-sidebar">
+            <h3>Related attractions</h3>
+
+            <div className="related-list">
+              {relatedAttractions.map((item) => (
+                <div
+                  className="related-card"
+                  key={item.id}
+                  onClick={() => navigate(`/attraction/${item.id}`)}
+                >
+                  <img src={item.image} alt={item.title} />
+                  <p>{item.title}</p>
+                </div>
+              ))}
+            </div>
+          </aside>
 
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
@@ -146,6 +213,11 @@ function AttractionDetails() {
                 onChange={handleChange}
                 required
               />
+              {!formData.entryDate && (
+                <p className="formHint">
+                  Please select an entry date.
+                </p>
+              )}
 
               <label>Number of tickets</label>
               <input
@@ -176,7 +248,9 @@ function AttractionDetails() {
         </div>
       )}
     </div>
+  </div>
   );
+
 }
 
 export default AttractionDetails;

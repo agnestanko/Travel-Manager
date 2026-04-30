@@ -2,7 +2,7 @@ import "./Header.css";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { isLoggedIn, logout, getCurrentUser } from "../services/authService";
-import logo from "../assets/logo_header.png"; // importa logo (pune imaginea in /src/assets/logo.png)
+import logo from "../assets/logo_header.png";
 
 function Header() {
   const navigate = useNavigate();
@@ -16,75 +16,63 @@ function Header() {
     navigate("/auth");
   };
 
+  const goToPage = (path) => {
+    navigate(path);
+    setShowMenu(false);
+  };
+
   return (
-      <div className="header">
+    <header className="header">
+      <div className="header-inner">
 
-         {/* MENU BUTTON */}
-      <div className="menuContainer">
-        <button
-          className="leftBtn"
-          onClick={() => setShowMenu(!showMenu)}
-        >
-          Menu
-        </button>
-
-        {/* DROPDOWN MENU */}
-        {showMenu && (
-          <div className="dropdownMenu">
-
-            <button onClick={
-              () => {navigate("/");
-              setShowMenu(false);
-            }}>
-              Home
-            </button>
-
-            {/* DOAR daca e logat */}
-            {loggedIn && (
-              <button onClick={() => {
-                navigate("/profile");
-                setShowMenu(false);
-              }}>
-                My Profile
-              </button>
-            )}
-
-          </div>
-        )}
-      </div>
-
-      {/* Zona centrala */}
-      <div className="center">
-
-        {/* Logo */}
-        <img src={logo} alt="logo" className="logo" />
-
-      </div>
-
-      {/* Dreapta */}
-      <div className="rightBtn">
-
-        {!loggedIn && (
-          <button onClick={() => navigate("/auth")}>
-            Login / Register
+        <div className="menuContainer">
+          <button
+            className="leftBtn"
+            onClick={() => setShowMenu(!showMenu)}
+          >
+            Menu
           </button>
-        )}
 
-        {loggedIn && (
-          <>
-            <div className="userBox">
-              <span>👤</span>
-              <span className="userName">{user?.name || "User"}</span>
+          {showMenu && (
+            <div className="dropdownMenu">
+              <button onClick={() => goToPage("/")}>Home</button>
+
+              {loggedIn && (
+                <button onClick={() => goToPage("/profile")}>
+                  My Profile
+                </button>
+              )}
             </div>
+          )}
+        </div>
 
-            <button onClick={handleLogout}>
-              Logout
+        <div className="center">
+          <img src={logo} alt="The Travelers logo" className="logo" />
+        </div>
+
+        <div className="rightBtn">
+          {!loggedIn && (
+            <button onClick={() => navigate("/auth")}>
+              Login / Register
             </button>
-          </>
-        )}
+          )}
+
+          {loggedIn && (
+            <>
+              <div className="userBox">
+                <span>👤</span>
+                <span className="userName">{user?.name || "User"}</span>
+              </div>
+
+              <button onClick={handleLogout}>
+                Logout
+              </button>
+            </>
+          )}
+        </div>
 
       </div>
-    </div>
+    </header>
   );
 }
 

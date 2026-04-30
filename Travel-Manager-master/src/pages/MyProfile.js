@@ -6,6 +6,7 @@ import "./MyProfile.css";
 function MyProfile() {
   const navigate = useNavigate();
   const user = getCurrentUser();
+  const [isEditing, setIsEditing] = useState(false);
 
   const [tickets, setTickets] = useState([]);
 
@@ -47,6 +48,11 @@ function MyProfile() {
     (ticket) => ticket.entryDate < today
   );
 
+  const [profileData, setProfileData] = useState({
+    name: user?.name || "",
+    email: user?.email || ""
+  });
+
   return (
     <div className="profile-container">
 
@@ -57,13 +63,63 @@ function MyProfile() {
       <h1 className="profile-title">My Profile</h1>
 
       {/* PERSONAL DATA */}
+      {/* Backend: PUT /api/User/profile; [Authorize] */}
       <section className="profile-section">
         <h2>Personal data</h2>
 
-        <p><strong>Name:</strong> {user?.name || "Unknown"}</p>
-        <p><strong>Email:</strong> {user?.email || "Unknown"}</p>
+        {!isEditing ? (
+          <>
+            <p><strong>Name:</strong> {user?.name || "Unknown"}</p>
+            <p><strong>Email:</strong> {user?.email || "Unknown"}</p>
 
-        <button className="edit-btn">Edit profile</button>
+            <button
+              className="edit-btn"
+              onClick={() => setIsEditing(true)}
+            >
+              Edit profile
+            </button>
+          </>
+        ) : (
+          <form className="profile-form">
+            <label>Name</label>
+            <input
+              name="name"
+              value={profileData.name}
+              onChange={(e) =>
+                setProfileData({
+                  ...profileData,
+                  name: e.target.value
+                })
+              }
+            />
+
+            <label>Email</label>
+            <input
+              name="email"
+              type="email"
+              value={profileData.email}
+              onChange={(e) =>
+                setProfileData({
+                  ...profileData,
+                  email: e.target.value
+                })
+              }
+            />
+
+            <div className="profile-actions">
+              <button type="button">
+                Save changes
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsEditing(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
       </section>
 
       {/* TICKETS */}
