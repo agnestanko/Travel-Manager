@@ -1,0 +1,35 @@
+# ======================
+# Visual Studio / .NET
+# ======================
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.rsuser
+
+# Compiled files
+*.dll
+*.exe
+*.pdb
+
+# ======================
+# Node / React
+# ======================
+node_modules/
+build/
+dist/
+.env
+.env.local
+
+# ======================
+# Logs
+# ======================
+*.log
+npm-debug.log*
+
+# ======================
+# OS files
+# ======================
+.DS_Store
+Thumbs.dbn

@@ -1,7 +1,6 @@
 import Home from "./pages/Home";
 import AttractionDetails from "./pages/AttractionDetails";
-
-// Import routing din react-router
+import Auth from "./pages/Auth";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 /**
@@ -15,8 +14,11 @@ function App() {
         {/* Pagina principala */}
         <Route path="/" element={<Home />} />
 
-        {/* Pagina de detalii pentru o atractie (id din URL) */}
+        {/* Pagina de detalii pentru o atractie */}
         <Route path="/attraction/:id" element={<AttractionDetails />} />
+
+         {/* Pagina pentru autentificare */}
+        <Route path="/auth" element={<Auth />} />
       </Routes>
     </BrowserRouter>
   );

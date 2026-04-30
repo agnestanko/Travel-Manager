@@ -27,3 +27,15 @@
 .center p {
   color: gray;
 }
+
+/* stil pentru text user */
+.userText {
+  font-size: 14px;
+  color: #333;
+}
+
+/* stil general pentru butoane */
+.rightBtn button {
+  padding: 6px 10px;
+  cursor: pointer;
+}

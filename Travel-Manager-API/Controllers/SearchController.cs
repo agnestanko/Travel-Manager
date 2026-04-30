@@ -18,11 +18,11 @@ namespace Travel_Manager_API.Controllers
         // GET: api/search?query=ceva
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Attraction>>> Search(
-        [FromQuery] string query,
-        [FromQuery] decimal? minPrice,
-        [FromQuery] decimal? maxPrice,
-        [FromQuery] string location,
-        [FromQuery] string sort)
+        [FromQuery] string? query = null,
+        [FromQuery] decimal? minPrice = null,
+        [FromQuery] decimal? maxPrice = null,
+        [FromQuery] string? location = null,
+        [FromQuery] string? sort = null)
         {
             var queryable = _context.Attractions.AsQueryable();
 

@@ -1,7 +1,8 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { attractions } from "../data/attractions.js";
 import "./AttractionDetails.css";
+import { isLoggedIn, getCurrentUser } from "../services/authService";
+import { API_URL } from "../services/api";
 
 function AttractionDetails() {
   const { id } = useParams();
@@ -10,16 +11,36 @@ function AttractionDetails() {
   const [attraction, setAttraction] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  // form (de conectat la backend )
+  const user = getCurrentUser();
+
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    tickets: 1
+    fullName: user?.name || "",
+    email: user?.email || "",
+    phoneNumber: "",
+    tickets: 1,
+    paymentMethod: "",
+    notes: ""
   });
 
   useEffect(() => {
-    const found = attractions.find(item => item.id === Number(id));
-    setAttraction(found);
+    const fetchAttraction = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/Search`);
+
+        if (!response.ok) {
+          throw new Error("API error");
+        }
+
+        const data = await response.json();
+        const found = data.find(item => item.id === Number(id));
+
+        setAttraction(found);
+      } catch (error) {
+        console.error("Eroare la incarcarea atractiei:", error);
+      }
+    };
+
+    fetchAttraction();
   }, [id]);
 
   if (!attraction) return <p>Attraction not found.</p>;
@@ -31,16 +52,38 @@ function AttractionDetails() {
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("ORDER DATA:", formData);
-    alert("Ticket reserved (frontend only)");
-    setShowModal(false);
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const orderData = {
+    ...formData,
+    attractionId: Number(id)
   };
+
+  console.log("ORDER DATA:", orderData);
+
+  alert("Ticket reserved");
+  setShowModal(false);
+};
+// Daca este endpoint in partea backend
+/* const response = await fetch(`${API_URL}/api/Tickets`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify(orderData)
+}); */
+
+ const handleBuyTicket = () => {
+  if (!isLoggedIn()) {
+    navigate("/auth");
+    return;
+  }
+  setShowModal(true);
+};
 
   return (
     <div className="details-container">
-
       <button onClick={() => navigate(-1)}>
         Back
       </button>
@@ -48,33 +91,39 @@ function AttractionDetails() {
       <h1>{attraction.name}</h1>
       <p>{attraction.location}</p>
       <p>{attraction.description}</p>
-      <p>{attraction.price} RON</p>
+      <p>{attraction.entryPrice} RON</p>
 
-      <button onClick={() => setShowModal(true)}>
+      <button onClick={handleBuyTicket}>
         Buy ticket
       </button>
 
-      {/* Pop up form */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-
             <h2>Buy ticket</h2>
 
             <form onSubmit={handleSubmit} className="form">
-
               <input
-                name="name"
+                name="fullName"
                 placeholder="Full name"
-                value={formData.name}
+                value={formData.fullName}
                 onChange={handleChange}
                 required
               />
 
               <input
                 name="email"
+                type="email"
                 placeholder="Email"
                 value={formData.email}
+                onChange={handleChange}
+                required
+              />
+
+              <input
+                name="phoneNumber"
+                placeholder="Phone number"
+                value={formData.phoneNumber}
                 onChange={handleChange}
                 required
               />
@@ -88,6 +137,24 @@ function AttractionDetails() {
                 required
               />
 
+              <select
+                name="paymentMethod"
+                value={formData.paymentMethod}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select payment method</option>
+                <option value="card">Card</option>
+                <option value="cash">Cash</option>
+              </select>
+
+              <textarea
+                name="notes"
+                placeholder="Additional notes"
+                value={formData.notes}
+                onChange={handleChange}
+              />
+
               <button type="submit">
                 Confirm purchase
               </button>
@@ -98,13 +165,10 @@ function AttractionDetails() {
               >
                 Cancel
               </button>
-
             </form>
-
           </div>
         </div>
       )}
-
     </div>
   );
 }

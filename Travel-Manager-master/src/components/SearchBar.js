@@ -1,90 +1,61 @@
-import { useState, useEffect } from "react"; // Import hooks React
-import "./SearchBar.css"; // Import stiluri
-import { attractions } from "../data/attractions.js"; // Import date mock
+import { useState, useEffect } from "react";
+import "./SearchBar.css";
+import { API_URL } from "../services/api";
 
-/**
- * Componenta SearchBar
- * Se ocupa de cautare, filtrare si sortare rezultate
- */
 function SearchBar({ setResults }) {
-
-  // State pentru input si filtre
   const [query, setQuery] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [location, setLocation] = useState("");
   const [sort, setSort] = useState("none");
   const [showFilter, setShowFilter] = useState(false);
-  const locations = [...new Set(attractions.map(item => item.location))]; // Extrage locatiile unice din date
 
-  /**
-   * Effect care ruleaza la fiecare schimbare de filtru
-   * Aplica filtrare + sortare si trimite rezultatele
-   */
+  const locations = ["Oradea", "Paris", "Bucuresti"];
+
   useEffect(() => {
-    let filtered = [...attractions]; // copiem array pentru siguranta
+    const fetchResults = async () => {
+      try {
+        const params = new URLSearchParams();
 
-    // Filtrare dupa nume sau locatie
-    if (query.trim() !== "") {
-      const q = query.toLowerCase();
-      filtered = filtered.filter(item =>
-        item.name.toLowerCase().includes(q) ||
-        item.location.toLowerCase().includes(q)
-      );
-    }
+        if (query.trim() !== "") params.append("query", query);
+        if (minPrice !== "") params.append("minPrice", minPrice);
+        if (maxPrice !== "") params.append("maxPrice", maxPrice);
+        if (location !== "") params.append("location", location);
+        if (sort !== "none") params.append("sort", sort);
 
-    // Filtrare dupa pret
-    filtered = filtered.filter(item => {
-      const min = minPrice === "" ? 0 : minPrice;
-      const max = maxPrice === "" ? Infinity : maxPrice;
+        const response = await fetch(`${API_URL}/api/Search?${params.toString()}`);
 
-      return item.price >= min && item.price <= max;
-    });
+        if (!response.ok) {
+          throw new Error("API error");
+        }
 
-    // Filtrare dupa locatie selectata
-    if (location) {
-      filtered = filtered.filter(item => item.location === location);
-    }
+        const data = await response.json();
+        setResults(data);
+      } catch (error) {
+        console.error("Eroare la fetch:", error);
+        setResults([]);
+      }
+    };
 
-    // Sortare dupa pret
-    if (sort === "asc") {
-      filtered.sort((a, b) => a.price - b.price);
-    } else if (sort === "desc") {
-      filtered.sort((a, b) => b.price - a.price);
-    }
-
-    // Trimitem rezultatele catre componenta parinte
-    setResults(filtered);
-
+    fetchResults();
   }, [query, minPrice, maxPrice, location, sort, setResults]);
 
-  /**
-   * Toggle pentru sortare (asc -> desc -> asc)
-   */
   const toggleSort = () => {
     if (sort === "none" || sort === "desc") setSort("asc");
     else setSort("desc");
   };
 
-  /**
-   * Reset toate filtrele
-   */
   const clearFilters = () => {
-    setMinPrice(0);
-    setMaxPrice(500);
+    setMinPrice("");
+    setMaxPrice("");
     setLocation("");
     setQuery("");
     setSort("none");
   };
 
-  const parsePrice = (value) => value === "" ? "" : Number(value);
-
   return (
     <div className="wrapper">
-
       <div className="topRow">
-
-        {/* Input cautare */}
         <input
           className="input"
           placeholder="Search events..."
@@ -92,7 +63,6 @@ function SearchBar({ setResults }) {
           onChange={(e) => setQuery(e.target.value)}
         />
 
-        {/* Dropdown filtre */}
         <div
           className="dropdownWrapper"
           onMouseEnter={() => setShowFilter(true)}
@@ -100,11 +70,8 @@ function SearchBar({ setResults }) {
         >
           <button type="button" className="iconBtn">Filter ▼</button>
 
-          {/* Afisare dropdown */}
           {showFilter && (
             <div className="dropdown">
-
-              {/* Filtru pret */}
               <div className="filterSection">
                 <label>Price range</label>
                 <div className="priceRange">
@@ -112,21 +79,20 @@ function SearchBar({ setResults }) {
                     type="number"
                     placeholder="Min"
                     value={minPrice}
-                    onChange={(e) => setMinPrice(parsePrice(e.target.value))}
+                    onChange={(e) => setMinPrice(e.target.value)}
                     className="priceInput"
                   />
-                  <span> </span>
+
                   <input
                     type="number"
                     placeholder="Max"
                     value={maxPrice}
-                    onChange={(e) => setMaxPrice(parsePrice(e.target.value))}
+                    onChange={(e) => setMaxPrice(e.target.value)}
                     className="priceInput"
                   />
                 </div>
               </div>
 
-              {/* Filtru locatie */}
               <div className="filterSection">
                 <label>Location</label>
                 <select
@@ -141,7 +107,6 @@ function SearchBar({ setResults }) {
                 </select>
               </div>
 
-              {/* Reset filtre */}
               <button
                 type="button"
                 className="clearBtn"
@@ -149,12 +114,10 @@ function SearchBar({ setResults }) {
               >
                 Clear all filters
               </button>
-
             </div>
           )}
         </div>
 
-        {/* Buton sortare */}
         <button
           type="button"
           className="iconBtn"
@@ -162,7 +125,6 @@ function SearchBar({ setResults }) {
         >
           Sort by price {sort === "asc" ? "↑" : sort === "desc" ? "↓" : ""}
         </button>
-
       </div>
     </div>
   );

@@ -160,3 +160,7 @@ C:\Users\Takacs Andras Csaba\Desktop\utcn\Anul III\Sem II\II\Proiect\Travel-Mana
 C:\Users\Takacs Andras Csaba\Desktop\utcn\Anul III\Sem II\II\Proiect\Travel-Manager-API\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Windows.Extensions.dll
 C:\Users\Takacs Andras Csaba\Desktop\utcn\Anul III\Sem II\II\Proiect\Travel-Manager-API\bin\Debug\net8.0\Class_Library_Travel_Manager.dll
 C:\Users\Takacs Andras Csaba\Desktop\utcn\Anul III\Sem II\II\Proiect\Travel-Manager-API\bin\Debug\net8.0\Class_Library_Travel_Manager.pdb
+C:\Users\Takacs Andras Csaba\Desktop\utcn\Anul III\Sem II\II\Proiect\Travel-Manager-API\bin\Debug\net8.0\SixLabors.ImageSharp.dll
+C:\Users\Takacs Andras Csaba\Desktop\utcn\Anul III\Sem II\II\Proiect\Travel-Manager-API\bin\Debug\net8.0\ZXing.ImageSharp.V2.dll
+C:\Users\Takacs Andras Csaba\Desktop\utcn\Anul III\Sem II\II\Proiect\Travel-Manager-API\bin\Debug\net8.0\BCrypt.Net-Next.dll
+C:\Users\Takacs Andras Csaba\Desktop\utcn\Anul III\Sem II\II\Proiect\Travel-Manager-API\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll

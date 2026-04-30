@@ -3,7 +3,32 @@
   "WorkspaceRootPath": "C:\\Users\\Takacs Andras Csaba\\Desktop\\utcn\\Anul III\\Sem II\\II\\Proiect\\Travel-Manager-API\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{5D5D9667-0EAB-62FE-8D5B-7D7591394F46}|..\\Class_Library_Travel_Manager\\Class_Library_Travel_Manager.csproj|c:\\users\\takacs andras csaba\\desktop\\utcn\\anul iii\\sem ii\\ii\\proiect\\class_library_travel_manager\\booking.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{5D5D9667-0EAB-62FE-8D5B-7D7591394F46}|..\\Class_Library_Travel_Manager\\Class_Library_Travel_Manager.csproj|c:\\users\\takacs andras csaba\\desktop\\utcn\\anul iii\\sem ii\\ii\\proiect\\class_library_travel_manager\\ticket.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5D5D9667-0EAB-62FE-8D5B-7D7591394F46}|..\\Class_Library_Travel_Manager\\Class_Library_Travel_Manager.csproj|c:\\users\\takacs andras csaba\\desktop\\utcn\\anul iii\\sem ii\\ii\\proiect\\class_library_travel_manager\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{76309C47-E483-44DF-9B86-AC4971C3B345}|Travel-Manager-API.csproj|c:\\users\\takacs andras csaba\\desktop\\utcn\\anul iii\\sem ii\\ii\\proiect\\travel-manager-api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{76309C47-E483-44DF-9B86-AC4971C3B345}|Travel-Manager-API.csproj|solutionrelative:controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{76309C47-E483-44DF-9B86-AC4971C3B345}|Travel-Manager-API.csproj|c:\\users\\takacs andras csaba\\desktop\\utcn\\anul iii\\sem ii\\ii\\proiect\\travel-manager-api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{76309C47-E483-44DF-9B86-AC4971C3B345}|Travel-Manager-API.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{76309C47-E483-44DF-9B86-AC4971C3B345}|Travel-Manager-API.csproj|c:\\users\\takacs andras csaba\\desktop\\utcn\\anul iii\\sem ii\\ii\\proiect\\travel-manager-api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{76309C47-E483-44DF-9B86-AC4971C3B345}|Travel-Manager-API.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5D5D9667-0EAB-62FE-8D5B-7D7591394F46}|..\\Class_Library_Travel_Manager\\Class_Library_Travel_Manager.csproj|c:\\users\\takacs andras csaba\\desktop\\utcn\\anul iii\\sem ii\\ii\\proiect\\class_library_travel_manager\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{76309C47-E483-44DF-9B86-AC4971C3B345}|Travel-Manager-API.csproj|c:\\users\\takacs andras csaba\\desktop\\utcn\\anul iii\\sem ii\\ii\\proiect\\travel-manager-api\\controllers\\searchcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{76309C47-E483-44DF-9B86-AC4971C3B345}|Travel-Manager-API.csproj|solutionrelative:controllers\\searchcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{5D5D9667-0EAB-62FE-8D5B-7D7591394F46}|..\\Class_Library_Travel_Manager\\Class_Library_Travel_Manager.csproj|c:\\users\\takacs andras csaba\\desktop\\utcn\\anul iii\\sem ii\\ii\\proiect\\class_library_travel_manager\\availabledate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
@@ -13,27 +38,6 @@
     },
     {
       "AbsoluteMoniker": "D:0:0:{5D5D9667-0EAB-62FE-8D5B-7D7591394F46}|..\\Class_Library_Travel_Manager\\Class_Library_Travel_Manager.csproj|c:\\users\\takacs andras csaba\\desktop\\utcn\\anul iii\\sem ii\\ii\\proiect\\class_library_travel_manager\\attraction.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{76309C47-E483-44DF-9B86-AC4971C3B345}|Travel-Manager-API.csproj|c:\\users\\takacs andras csaba\\desktop\\utcn\\anul iii\\sem ii\\ii\\proiect\\travel-manager-api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{76309C47-E483-44DF-9B86-AC4971C3B345}|Travel-Manager-API.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{76309C47-E483-44DF-9B86-AC4971C3B345}|Travel-Manager-API.csproj|c:\\users\\takacs andras csaba\\desktop\\utcn\\anul iii\\sem ii\\ii\\proiect\\travel-manager-api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{76309C47-E483-44DF-9B86-AC4971C3B345}|Travel-Manager-API.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{76309C47-E483-44DF-9B86-AC4971C3B345}|Travel-Manager-API.csproj|c:\\users\\takacs andras csaba\\desktop\\utcn\\anul iii\\sem ii\\ii\\proiect\\travel-manager-api\\controllers\\searchcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{76309C47-E483-44DF-9B86-AC4971C3B345}|Travel-Manager-API.csproj|solutionrelative:controllers\\searchcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5D5D9667-0EAB-62FE-8D5B-7D7591394F46}|..\\Class_Library_Travel_Manager\\Class_Library_Travel_Manager.csproj|c:\\users\\takacs andras csaba\\desktop\\utcn\\anul iii\\sem ii\\ii\\proiect\\class_library_travel_manager\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5D5D9667-0EAB-62FE-8D5B-7D7591394F46}|..\\Class_Library_Travel_Manager\\Class_Library_Travel_Manager.csproj|c:\\users\\takacs andras csaba\\desktop\\utcn\\anul iii\\sem ii\\ii\\proiect\\class_library_travel_manager\\booking.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5D5D9667-0EAB-62FE-8D5B-7D7591394F46}|..\\Class_Library_Travel_Manager\\Class_Library_Travel_Manager.csproj|c:\\users\\takacs andras csaba\\desktop\\utcn\\anul iii\\sem ii\\ii\\proiect\\class_library_travel_manager\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -43,37 +47,50 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 6,
+          "SelectedChildIndex": 8,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 3,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "C:\\Users\\Takacs Andras Csaba\\Desktop\\utcn\\Anul III\\Sem II\\II\\Proiect\\Travel-Manager-API\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AuthController.cs",
+              "ToolTip": "C:\\Users\\Takacs Andras Csaba\\Desktop\\utcn\\Anul III\\Sem II\\II\\Proiect\\Travel-Manager-API\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "Controllers\\AuthController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADAAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-29T13:50:01.383Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
               "Title": "SearchController.cs",
               "DocumentMoniker": "C:\\Users\\Takacs Andras Csaba\\Desktop\\utcn\\Anul III\\Sem II\\II\\Proiect\\Travel-Manager-API\\Controllers\\SearchController.cs",
               "RelativeDocumentMoniker": "Controllers\\SearchController.cs",
               "ToolTip": "C:\\Users\\Takacs Andras Csaba\\Desktop\\utcn\\Anul III\\Sem II\\II\\Proiect\\Travel-Manager-API\\Controllers\\SearchController.cs",
               "RelativeToolTip": "Controllers\\SearchController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACcAAAANAAAAAAAAAA==",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAACcAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-04-25T11:12:24.15Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\Takacs Andras Csaba\\Desktop\\utcn\\Anul III\\Sem II\\II\\Proiect\\Travel-Manager-API\\appsettings.json",
               "RelativeDocumentMoniker": "appsettings.json",
               "ToolTip": "C:\\Users\\Takacs Andras Csaba\\Desktop\\utcn\\Anul III\\Sem II\\II\\Proiect\\Travel-Manager-API\\appsettings.json",
               "RelativeToolTip": "appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAACSAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
               "WhenOpened": "2026-04-25T09:25:33.812Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 10,
               "Title": "Attraction.cs",
               "DocumentMoniker": "C:\\Users\\Takacs Andras Csaba\\Desktop\\utcn\\Anul III\\Sem II\\II\\Proiect\\Class_Library_Travel_Manager\\Attraction.cs",
               "RelativeDocumentMoniker": "..\\Class_Library_Travel_Manager\\Attraction.cs",
@@ -86,7 +103,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 9,
               "Title": "Reviews.cs",
               "DocumentMoniker": "C:\\Users\\Takacs Andras Csaba\\Desktop\\utcn\\Anul III\\Sem II\\II\\Proiect\\Class_Library_Travel_Manager\\Reviews.cs",
               "RelativeDocumentMoniker": "..\\Class_Library_Travel_Manager\\Reviews.cs",
@@ -99,7 +116,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 8,
               "Title": "AvailableDate.cs",
               "DocumentMoniker": "C:\\Users\\Takacs Andras Csaba\\Desktop\\utcn\\Anul III\\Sem II\\II\\Proiect\\Class_Library_Travel_Manager\\AvailableDate.cs",
               "RelativeDocumentMoniker": "..\\Class_Library_Travel_Manager\\AvailableDate.cs",
@@ -112,65 +129,65 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 2,
               "Title": "User.cs",
               "DocumentMoniker": "C:\\Users\\Takacs Andras Csaba\\Desktop\\utcn\\Anul III\\Sem II\\II\\Proiect\\Class_Library_Travel_Manager\\User.cs",
               "RelativeDocumentMoniker": "..\\Class_Library_Travel_Manager\\User.cs",
               "ToolTip": "C:\\Users\\Takacs Andras Csaba\\Desktop\\utcn\\Anul III\\Sem II\\II\\Proiect\\Class_Library_Travel_Manager\\User.cs",
               "RelativeToolTip": "..\\Class_Library_Travel_Manager\\User.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAsAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAABIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-04-25T08:58:39.25Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "Ticket.cs",
               "DocumentMoniker": "C:\\Users\\Takacs Andras Csaba\\Desktop\\utcn\\Anul III\\Sem II\\II\\Proiect\\Class_Library_Travel_Manager\\Ticket.cs",
               "RelativeDocumentMoniker": "..\\Class_Library_Travel_Manager\\Ticket.cs",
               "ToolTip": "C:\\Users\\Takacs Andras Csaba\\Desktop\\utcn\\Anul III\\Sem II\\II\\Proiect\\Class_Library_Travel_Manager\\Ticket.cs",
               "RelativeToolTip": "..\\Class_Library_Travel_Manager\\Ticket.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAACsAAAAwAAAAAAAAAA==",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAACsAAAAwAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-04-25T08:58:27.344Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 0,
               "Title": "Booking.cs",
               "DocumentMoniker": "C:\\Users\\Takacs Andras Csaba\\Desktop\\utcn\\Anul III\\Sem II\\II\\Proiect\\Class_Library_Travel_Manager\\Booking.cs",
               "RelativeDocumentMoniker": "..\\Class_Library_Travel_Manager\\Booking.cs",
               "ToolTip": "C:\\Users\\Takacs Andras Csaba\\Desktop\\utcn\\Anul III\\Sem II\\II\\Proiect\\Class_Library_Travel_Manager\\Booking.cs",
               "RelativeToolTip": "..\\Class_Library_Travel_Manager\\Booking.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAmAAAAAAAAAA==",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAkAAAAmAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-04-25T08:57:30.556Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 4,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\Takacs Andras Csaba\\Desktop\\utcn\\Anul III\\Sem II\\II\\Proiect\\Travel-Manager-API\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
               "ToolTip": "C:\\Users\\Takacs Andras Csaba\\Desktop\\utcn\\Anul III\\Sem II\\II\\Proiect\\Travel-Manager-API\\Program.cs",
               "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAlAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-04-24T14:39:05.717Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 6,
               "Title": "AppDbContext.cs",
               "DocumentMoniker": "C:\\Users\\Takacs Andras Csaba\\Desktop\\utcn\\Anul III\\Sem II\\II\\Proiect\\Class_Library_Travel_Manager\\AppDbContext.cs",
               "RelativeDocumentMoniker": "..\\Class_Library_Travel_Manager\\AppDbContext.cs",
               "ToolTip": "C:\\Users\\Takacs Andras Csaba\\Desktop\\utcn\\Anul III\\Sem II\\II\\Proiect\\Class_Library_Travel_Manager\\AppDbContext.cs",
               "RelativeToolTip": "..\\Class_Library_Travel_Manager\\AppDbContext.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAE0AAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAlAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-04-24T13:50:27.895Z",
               "EditorCaption": ""
