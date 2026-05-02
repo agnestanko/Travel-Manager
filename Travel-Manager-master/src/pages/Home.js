@@ -1,23 +1,39 @@
 import SearchBar from "../components/SearchBar";
 import ResultsList from "../components/ResultsList";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../services/api";
 import "./Home.css";
-
-// Astept backend
-import img1 from "../assets/gallery1.jpeg";
-import img2 from "../assets/gallery2.jpeg";
-import img3 from "../assets/gallery3.jpeg";
 
 function Home() {
   const [results, setResults] = useState([]);
+  const [gallery, setGallery] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const navigate = useNavigate();
 
-  const allAttractionsGallery = [
-    { id: 1, title: "Aquapark Nymphaea", image: img1 },
-    { id: 2, title: "Adventure Park", image: img2 },
-    { id: 3, title: "City Experience", image: img3 }
-  ];
+  useEffect(() => {
+    const fetchGallery = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${API_URL}/api/home`);
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch attractions");
+        }
+
+        const data = await response.json();
+        setGallery(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGallery();
+  }, []);
 
   return (
     <div className="home-page">
@@ -29,15 +45,25 @@ function Home() {
       <section className="home-gallery-section">
         <h2>Explore attractions</h2>
 
+        {loading && <p>Loading attractions...</p>}
+        {error && <p className="error">{error}</p>}
+
         <div className="home-gallery-grid">
-          {allAttractionsGallery.map((item) => (
+          {gallery.map((item) => (
             <div
               className="home-gallery-card"
               key={item.id}
               onClick={() => navigate(`/attraction/${item.id}`)}
             >
-              <img src={item.image} alt={item.title} />
-              <p>{item.title}</p>
+              <img
+                src={
+                  item.firstImage
+                    ? `${API_URL}/${item.firstImage}`
+                    : "https://via.placeholder.com/300"
+                }
+                alt={item.name}
+              />
+              <p>{item.name}</p>
             </div>
           ))}
         </div>

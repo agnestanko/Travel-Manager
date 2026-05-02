@@ -5,6 +5,7 @@ public class AppDbContext : DbContext
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Attraction> Attractions { get; set; }
+    public DbSet<AttractionImage> AttractionImages { get; set; }
     public DbSet<Booking> Bookings { get; set; }
     public DbSet<Ticket> Tickets { get; set; }
     public DbSet<Reviews> Reviews { get; set; }
@@ -79,5 +80,11 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Email)
             .IsUnique();
+
+        modelBuilder.Entity<AttractionImage>()
+            .HasOne(img => img.Attraction)
+            .WithMany(a => a.Images)
+            .HasForeignKey(img => img.AttractionId);
+
     }
 }

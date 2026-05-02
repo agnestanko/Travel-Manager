@@ -5,24 +5,21 @@ import { isLoggedIn, getCurrentUser } from "../services/authService";
 import { API_URL } from "../services/api";
 import ImageGallery from "../components/ImageGallery";
 
-// Imagini temporale: Backend
-import img1 from "../assets/gallery1.jpeg";
-import img2 from "../assets/gallery2.jpeg";
-import img3 from "../assets/gallery3.jpeg";
-
 function AttractionDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [attraction, setAttraction] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [related, setRelated] = useState([]);
   //const [availableDates, setAvailableDates] = useState([]);
   //const [unavailableDates, setUnavailableDates] = useState([]);
   //PAS 3 (viitor)-> calendar custom (highlight zile)
 
   const user = getCurrentUser();
 
-  const attractionImages = [img1, img2, img3];
+  // Stocăm URL-urile imaginilor extrase din baza de date
+  const [images, setImages] = useState([]);
 
   //Input pentru BuyTicketForm -> functii handle -> implementare logica in backend; POST /api/Tickets; calc total Price=price+profit?
   const [formData, setFormData] = useState({
@@ -33,27 +30,55 @@ function AttractionDetails() {
   });
 
   useEffect(() => {
-    const fetchAttraction = async () => {
-      try {
-        const response = await fetch(`${API_URL}/api/Search`);
+  const fetchAttraction = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/Attraction/${id}`); // << folosește controller-ul corect
 
-        if (!response.ok) {
-          throw new Error("API error");
-        }
+      if (!response.ok) throw new Error("API error");
 
-        const data = await response.json();
-        const found = data.find((item) => item.id === Number(id));
+      const attractionData = await response.json(); // direct obiectul, nu array
+      setAttraction(attractionData);
 
-        setAttraction(found);
-      } catch (error) {
-        console.error("Error loading attraction:", error);
+      // După ce am primit atracția, extragem imaginile
+      if (attractionData && attractionData.images) {
+        const imageUrls = attractionData.images.map(img => `${API_URL}/${img.imagePath}`);
+        setImages(imageUrls);
+      } else {
+        setImages([]);
       }
-    };
+    } catch (error) {
+      console.error("Error loading attraction:", error);
+    }
+  };
 
-    fetchAttraction();
-  }, [id]);
+  fetchAttraction();
+}, [id]);
 
   if (!attraction) return <p>Attraction not found.</p>;
+
+  useEffect(() => {
+  const fetchRelated = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/relatedattractions/${id}?count=3`);
+      if (!response.ok) throw new Error("Failed to fetch related");
+      const data = await response.json();
+      // Transformă datele pentru afișare
+      const items = data.map(item => ({
+        id: item.id,
+        title: item.name,
+        image: item.firstImage
+          ? `${API_URL}/${item.firstImage}`
+          : "https://via.placeholder.com/300"
+      }));
+      setRelated(items);
+    } catch (err) {
+      console.error("Error loading related attractions:", err);
+      setRelated([]);
+    }
+  };
+
+  if (id) fetchRelated();
+}, [id]);
 
   /*
 useEffect(() => {
@@ -74,7 +99,8 @@ useEffect(() => {
   const price = Number(attraction.entryPrice) || 0;
   const totalPrice = price * Number(formData.tickets);
 
-  //const attractionImages = [img1, img2, img3];
+  // Imaginile atracției vin din baza de date; dacă nu există, folosim un placeholder
+  const attractionImages = images.length > 0 ? images : ["/placeholder.jpg"];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -134,9 +160,9 @@ useEffect(() => {
   };
 
   const relatedAttractions = [
-    { id: 2, title: "Adventure Park", image: img2 },
-    { id: 3, title: "City Experience", image: img3 },
-    { id: 1, title: "Aquapark Nymphaea", image: img1 }
+    { id: 2, title: "Adventure Park", image: "/assets/gallery2.jpeg" },
+    { id: 3, title: "City Experience", image: "/assets/gallery3.jpeg" },
+    { id: 1, title: "Aquapark Nymphaea", image: "/assets/gallery1.jpeg" }
   ];
 
   return (

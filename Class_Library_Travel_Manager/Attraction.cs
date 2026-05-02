@@ -13,6 +13,7 @@ namespace Class_Library_Travel_Manager
         public int EntryPrice { get; set; }
         public ICollection<AvailableDate> AvailableDates { get; set; }
         public ICollection<User> UsersWhoFavorited { get; set; }
+        public ICollection<AttractionImage> Images { get; set; }
 
         private Attraction() { }
 
@@ -26,6 +27,7 @@ namespace Class_Library_Travel_Manager
             EntryPrice = entryPrice;
             AvailableDates = new List<AvailableDate>();
             UsersWhoFavorited = new List<User>();
+            Images = new List<AttractionImage>();
         }
     }
 }
