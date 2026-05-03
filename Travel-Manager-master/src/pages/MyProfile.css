@@ -32,18 +32,6 @@
   cursor: pointer;
 }
 
-.ticket-card {
-  border: 1px solid #ddd;
-  padding: 15px;
-  border-radius: 10px;
-  margin: 10px 0;
-  background: #fafafa;
-}
-
-.ticket-card.expired {
-  opacity: 0.6;
-}
-
 .profile-form {
   display: flex;
   flex-direction: column;
@@ -60,4 +48,89 @@
   display: flex;
   gap: 10px;
   margin-top: 12px;
+}
+
+/* ==============================
+   TICKET CARD
+   ============================== */
+
+.ticket-card {
+  display: flex;
+  gap: 20px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  margin: 14px 0;
+  background: #fafafa;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+
+.ticket-card:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+
+.ticket-card.expired {
+  opacity: 0.55;
+}
+
+/* Imaginea atractiei din bilet */
+.ticket-image {
+  width: 160px;
+  min-width: 160px;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Detaliile biletului (dreapta imaginii) */
+.ticket-info {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+
+.ticket-attraction {
+  margin: 0 0 6px 0;
+  font-size: 18px;
+  color: #1a1a1a;
+}
+
+.ticket-info p {
+  margin: 0;
+  font-size: 14px;
+  color: #444;
+}
+
+/* Codul textual al biletului */
+.ticket-code {
+  font-family: monospace;
+  color: #007bff !important;
+  font-size: 15px !important;
+}
+
+/* Imaginea codului de bare */
+.ticket-barcode {
+  width: 220px;
+  height: auto;
+  margin-top: 10px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+}
+
+.ticket-barcode-loading {
+  font-size: 13px;
+  color: #999;
+  margin-top: 10px;
+}
+
+@media (max-width: 600px) {
+  .ticket-card {
+    flex-direction: column;
+  }
+
+  .ticket-image {
+    width: 100%;
+    height: 160px;
+  }
 }

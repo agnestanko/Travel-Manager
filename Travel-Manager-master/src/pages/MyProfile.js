@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { isLoggedIn, getCurrentUser } from "../services/authService";
+import { API_URL } from "../services/api";
 import "./MyProfile.css";
 
 function MyProfile() {
@@ -10,6 +11,10 @@ function MyProfile() {
 
   const [tickets, setTickets] = useState([]);
 
+  // Map de { ticketId → barcodeObjectURL }
+  // Folosim blob URL-uri ca sa putem trimite header-ul de autorizare la fetch
+  const [barcodes, setBarcodes] = useState({});
+
   useEffect(() => {
     // daca nu este logat → redirect
     if (!isLoggedIn()) {
@@ -17,25 +22,51 @@ function MyProfile() {
       return;
     }
 
-    // temporar (pana ai backend)
-    setTickets([]);
+    // dupa backend implementat: POST /api/Tickets/buy; GET /api/Tickets/my-tickets
+    const fetchTickets = async () => {
+      const response = await fetch(`${API_URL}/api/Tickets/my-tickets`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setTickets(data);
+      }
+    };
+
+    fetchTickets();
   }, [navigate]);
 
-    // dupa backend implementat: POST /api/Tickets; GET /api/Tickets/my-tickets
-    /*
-        const fetchTickets = async () => {
-        const response = await fetch(`${API_URL}/api/Tickets/my-tickets`, {
-            headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
-            }
-        });
+  // Dupa ce se incarca biletele, fetch-uim barcode-ul fiecaruia ca blob
+  // Folosim blob URL-uri deoarece tag-ul <img> nu poate trimite Authorization header direct
+  useEffect(() => {
+    if (tickets.length === 0) return;
 
-        if (response.ok) {
-            const data = await response.json();
-            setTickets(data);
+    const fetchBarcodes = async () => {
+      const token = localStorage.getItem("token");
+      const barcodeMap = {};
+
+      for (const ticket of tickets) {
+        try {
+          const res = await fetch(`${API_URL}/api/Tickets/${ticket.id}/barcode`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (res.ok) {
+            const blob = await res.blob();
+            barcodeMap[ticket.id] = URL.createObjectURL(blob);
+          }
+        } catch (err) {
+          console.error(`Error loading barcode for ticket ${ticket.id}:`, err);
         }
+      }
+
+      setBarcodes(barcodeMap);
     };
-    */
+
+    fetchBarcodes();
+  }, [tickets]);
 
   // data curenta pentru separare active/expired
   const today = new Date().toISOString().split("T")[0];
@@ -52,6 +83,42 @@ function MyProfile() {
     name: user?.name || "",
     email: user?.email || ""
   });
+
+  // Componenta pentru un card de bilet
+  const TicketCard = ({ ticket, expired }) => (
+    <div className={`ticket-card ${expired ? "expired" : ""}`}>
+      {/* Imaginea atractiei */}
+      {ticket.firstImage && (
+        <img
+          src={`${API_URL}/${ticket.firstImage}`}
+          alt={ticket.attractionName}
+          className="ticket-image"
+        />
+      )}
+
+      <div className="ticket-info">
+        <h3 className="ticket-attraction">{ticket.attractionName}</h3>
+
+        <p><strong>Entry date:</strong> {ticket.entryDate}</p>
+        <p><strong>Purchase date:</strong> {ticket.dateOfPurchase}</p>
+        <p><strong>Price:</strong> {ticket.pricePerTicket} RON</p>
+        <p className="ticket-code">
+          <strong>Code:</strong> TKT-{String(ticket.id).padStart(6, "0")}
+        </p>
+
+        {/* Codul de bare generat de backend */}
+        {barcodes[ticket.id] ? (
+          <img
+            src={barcodes[ticket.id]}
+            alt={`Barcode for ticket ${ticket.id}`}
+            className="ticket-barcode"
+          />
+        ) : (
+          <p className="ticket-barcode-loading">Loading barcode...</p>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <div className="profile-container">
@@ -132,11 +199,7 @@ function MyProfile() {
           <p>No active tickets.</p>
         ) : (
           activeTickets.map((ticket) => (
-            <div className="ticket-card" key={ticket.id}>
-              <p><strong>Attraction:</strong> {ticket.attractionName}</p>
-              <p><strong>Entry date:</strong> {ticket.entryDate}</p>
-              <p><strong>Total price:</strong> {ticket.totalPrice} RON</p>
-            </div>
+            <TicketCard key={ticket.id} ticket={ticket} expired={false} />
           ))
         )}
 
@@ -146,11 +209,7 @@ function MyProfile() {
           <p>No expired tickets.</p>
         ) : (
           expiredTickets.map((ticket) => (
-            <div className="ticket-card expired" key={ticket.id}>
-              <p><strong>Attraction:</strong> {ticket.attractionName}</p>
-              <p><strong>Entry date:</strong> {ticket.entryDate}</p>
-              <p><strong>Total price:</strong> {ticket.totalPrice} RON</p>
-            </div>
+            <TicketCard key={ticket.id} ticket={ticket} expired={true} />
           ))
         )}
 
