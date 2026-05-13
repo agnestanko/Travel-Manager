@@ -10,26 +10,31 @@ function MyProfile() {
   const [isEditing, setIsEditing] = useState(false);
 
   const [tickets, setTickets] = useState([]);
-
-  // Map de { ticketId → barcodeObjectURL }
-  // Folosim blob URL-uri ca sa putem trimite header-ul de autorizare la fetch
   const [barcodes, setBarcodes] = useState({});
 
+  // Mesaj profil (editare date personale)
+  const [profileMessage, setProfileMessage] = useState({ text: "", success: false });
+
+  // State pentru schimbarea parolei
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmNewPassword: ""
+  });
+  const [passwordMessage, setPasswordMessage] = useState({ text: "", success: false });
+
   useEffect(() => {
-    // daca nu este logat → redirect
     if (!isLoggedIn()) {
       navigate("/auth");
       return;
     }
 
-    // dupa backend implementat: POST /api/Tickets/buy; GET /api/Tickets/my-tickets
     const fetchTickets = async () => {
       const response = await fetch(`${API_URL}/api/Tickets/my-tickets`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`
         }
       });
-
       if (response.ok) {
         const data = await response.json();
         setTickets(data);
@@ -39,8 +44,6 @@ function MyProfile() {
     fetchTickets();
   }, [navigate]);
 
-  // Dupa ce se incarca biletele, fetch-uim barcode-ul fiecaruia ca blob
-  // Folosim blob URL-uri deoarece tag-ul <img> nu poate trimite Authorization header direct
   useEffect(() => {
     if (tickets.length === 0) return;
 
@@ -68,26 +71,95 @@ function MyProfile() {
     fetchBarcodes();
   }, [tickets]);
 
-  // data curenta pentru separare active/expired
   const today = new Date().toISOString().split("T")[0];
+  const activeTickets = tickets.filter((ticket) => ticket.entryDate >= today);
+  const expiredTickets = tickets.filter((ticket) => ticket.entryDate < today);
 
-  const activeTickets = tickets.filter(
-    (ticket) => ticket.entryDate >= today
-  );
-
-  const expiredTickets = tickets.filter(
-    (ticket) => ticket.entryDate < today
-  );
-
+  // --- Date personale ---
   const [profileData, setProfileData] = useState({
     name: user?.name || "",
-    email: user?.email || ""
+    surname: user?.surname || "",
+    email: user?.email || "",
+    password: ""
   });
 
-  // Componenta pentru un card de bilet
+  const handleProfileChange = (e) => {
+    setProfileData({ ...profileData, [e.target.name]: e.target.value });
+  };
+
+  const handleSaveProfile = async () => {
+    setProfileMessage({ text: "", success: false });
+
+    const response = await fetch(`${API_URL}/api/User/profile`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      },
+      body: JSON.stringify({
+        name: profileData.name,
+        surname: profileData.surname,
+        email: profileData.email,
+        password: profileData.password
+      })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      localStorage.setItem("user", JSON.stringify(data.user));
+      setProfileMessage({ text: "Changes have been saved.", success: true });
+      setIsEditing(false);
+      setProfileData({ ...profileData, password: "" });
+    } else {
+      const errorText = await response.text();
+      setProfileMessage({
+        text: errorText.replace(/"/g, "") || "An error occurred. Please try again.",
+        success: false
+      });
+    }
+  };
+
+  // --- Schimbare parolă ---
+  const handlePasswordChange = (e) => {
+    setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
+  };
+
+  const handleChangePassword = async () => {
+    setPasswordMessage({ text: "", success: false });
+
+    if (passwordData.newPassword !== passwordData.confirmNewPassword) {
+      setPasswordMessage({ text: "New passwords do not match.", success: false });
+      return;
+    }
+
+    const response = await fetch(`${API_URL}/api/User/change-password`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      },
+      body: JSON.stringify({
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      setPasswordMessage({ text: data.message, success: true });
+      setPasswordData({ currentPassword: "", newPassword: "", confirmNewPassword: "" });
+    } else {
+      const errorText = await response.text();
+      setPasswordMessage({
+        text: errorText.replace(/"/g, "") || "An error occurred.",
+        success: false
+      });
+    }
+  };
+
+  // Componentă bilet (neschimbată)
   const TicketCard = ({ ticket, expired }) => (
     <div className={`ticket-card ${expired ? "expired" : ""}`}>
-      {/* Imaginea atractiei */}
       {ticket.firstImage && (
         <img
           src={`${API_URL}/${ticket.firstImage}`}
@@ -98,7 +170,6 @@ function MyProfile() {
 
       <div className="ticket-info">
         <h3 className="ticket-attraction">{ticket.attractionName}</h3>
-
         <p><strong>Entry date:</strong> {ticket.entryDate}</p>
         <p><strong>Purchase date:</strong> {ticket.dateOfPurchase}</p>
         <p><strong>Price:</strong> {ticket.pricePerTicket} RON</p>
@@ -106,7 +177,6 @@ function MyProfile() {
           <strong>Code:</strong> TKT-{String(ticket.id).padStart(6, "0")}
         </p>
 
-        {/* Codul de bare generat de backend */}
         {barcodes[ticket.id] ? (
           <img
             src={barcodes[ticket.id]}
@@ -122,79 +192,136 @@ function MyProfile() {
 
   return (
     <div className="profile-container">
-
       <button className="back-btn" onClick={() => navigate("/")}>
         Back to Home
       </button>
 
       <h1 className="profile-title">My Profile</h1>
 
-      {/* PERSONAL DATA */}
-      {/* Backend: PUT /api/User/profile; [Authorize] */}
+      {/* DATE PERSONALE */}
       <section className="profile-section">
         <h2>Personal data</h2>
+
+        {profileMessage.text && (
+          <p className={profileMessage.success ? "profile-msg-success" : "profile-msg-error"}>
+            {profileMessage.text}
+          </p>
+        )}
 
         {!isEditing ? (
           <>
             <p><strong>Name:</strong> {user?.name || "Unknown"}</p>
             <p><strong>Email:</strong> {user?.email || "Unknown"}</p>
-
             <button
               className="edit-btn"
-              onClick={() => setIsEditing(true)}
+              onClick={() => {
+                setIsEditing(true);
+                setProfileMessage({ text: "", success: false });
+              }}
             >
               Edit profile
             </button>
           </>
         ) : (
-          <form className="profile-form">
+          <div className="profile-form">
             <label>Name</label>
             <input
               name="name"
               value={profileData.name}
-              onChange={(e) =>
-                setProfileData({
-                  ...profileData,
-                  name: e.target.value
-                })
-              }
+              onChange={handleProfileChange}
             />
-
+            <label>Surname</label>
+            <input
+              name="surname"
+              value={profileData.surname}
+              onChange={handleProfileChange}
+            />
             <label>Email</label>
             <input
               name="email"
               type="email"
               value={profileData.email}
-              onChange={(e) =>
-                setProfileData({
-                  ...profileData,
-                  email: e.target.value
-                })
-              }
+              onChange={handleProfileChange}
             />
-
+            <label>Confirm with password</label>
+            <input
+              name="password"
+              type="password"
+              placeholder="Enter your current password"
+              value={profileData.password}
+              onChange={handleProfileChange}
+            />
             <div className="profile-actions">
-              <button type="button">
+              <button type="button" onClick={handleSaveProfile}>
                 Save changes
               </button>
-
               <button
                 type="button"
-                onClick={() => setIsEditing(false)}
+                onClick={() => {
+                  setIsEditing(false);
+                  setProfileMessage({ text: "", success: false });
+                  setProfileData({ ...profileData, password: "" });
+                }}
               >
                 Cancel
               </button>
             </div>
-          </form>
+          </div>
         )}
       </section>
 
-      {/* TICKETS */}
+      {/* SCHIMBARE PAROLĂ */}
+      <section className="profile-section">
+        <h2>Change Password</h2>
+        {passwordMessage.text && (
+          <p className={passwordMessage.success ? "profile-msg-success" : "profile-msg-error"}>
+            {passwordMessage.text}
+          </p>
+        )}
+        <div className="profile-form">
+          <label>Current password</label>
+          <input
+            name="currentPassword"
+            type="password"
+            value={passwordData.currentPassword}
+            onChange={handlePasswordChange}
+          />
+          <label>New password</label>
+          <input
+            name="newPassword"
+            type="password"
+            value={passwordData.newPassword}
+            onChange={handlePasswordChange}
+          />
+          <label>Confirm new password</label>
+          <input
+            name="confirmNewPassword"
+            type="password"
+            value={passwordData.confirmNewPassword}
+            onChange={handlePasswordChange}
+          />
+          <div className="profile-actions">
+            <button type="button" onClick={handleChangePassword}>
+              Change password
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPasswordData({ currentPassword: "", newPassword: "", confirmNewPassword: "" });
+                setPasswordMessage({ text: "", success: false });
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* BILETE */}
       <section className="profile-section">
         <h2>My Tickets</h2>
 
         <h3>Active tickets</h3>
-
         {activeTickets.length === 0 ? (
           <p>No active tickets.</p>
         ) : (
@@ -204,7 +331,6 @@ function MyProfile() {
         )}
 
         <h3>Expired tickets</h3>
-
         {expiredTickets.length === 0 ? (
           <p>No expired tickets.</p>
         ) : (
@@ -212,7 +338,6 @@ function MyProfile() {
             <TicketCard key={ticket.id} ticket={ticket} expired={true} />
           ))
         )}
-
       </section>
     </div>
   );
