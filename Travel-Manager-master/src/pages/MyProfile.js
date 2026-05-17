@@ -6,7 +6,7 @@ import "./MyProfile.css";
 
 function MyProfile() {
   const navigate = useNavigate();
-  const user = getCurrentUser();
+  const [currentUser, setCurrentUser] = useState(getCurrentUser());
   const [isEditing, setIsEditing] = useState(false);
 
   const [tickets, setTickets] = useState([]);
@@ -22,6 +22,16 @@ function MyProfile() {
     confirmNewPassword: ""
   });
   const [passwordMessage, setPasswordMessage] = useState({ text: "", success: false });
+
+  const buildImageUrl = (path) => {
+    if (!path) return "/placeholder.jpg";
+
+    if (path.startsWith("http")) {
+      return path;
+    }
+
+    return `${API_URL}${path.startsWith("/") ? path : `/${path}`}`;
+  };
 
   useEffect(() => {
     if (!isLoggedIn()) {
@@ -77,9 +87,9 @@ function MyProfile() {
 
   // --- Date personale ---
   const [profileData, setProfileData] = useState({
-    name: user?.name || "",
-    surname: user?.surname || "",
-    email: user?.email || "",
+    name: currentUser?.name || "",
+    surname: currentUser?.surname || "",
+    email: currentUser?.email || "",
     password: ""
   });
 
@@ -107,9 +117,15 @@ function MyProfile() {
     if (response.ok) {
       const data = await response.json();
       localStorage.setItem("user", JSON.stringify(data.user));
+      setCurrentUser(data.user);
       setProfileMessage({ text: "Changes have been saved.", success: true });
       setIsEditing(false);
-      setProfileData({ ...profileData, password: "" });
+      setProfileData({
+        name: data.user.name || "",
+        surname: data.user.surname || "",
+        email: data.user.email || "",
+        password: ""
+      });
     } else {
       const errorText = await response.text();
       setProfileMessage({
@@ -119,7 +135,7 @@ function MyProfile() {
     }
   };
 
-  // --- Schimbare parolă ---
+  // --- Schimbare parola ---
   const handlePasswordChange = (e) => {
     setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
   };
@@ -127,10 +143,14 @@ function MyProfile() {
   const handleChangePassword = async () => {
     setPasswordMessage({ text: "", success: false });
 
-    if (passwordData.newPassword !== passwordData.confirmNewPassword) {
-      setPasswordMessage({ text: "New passwords do not match.", success: false });
+    if (
+      !passwordData.currentPassword ||
+      !passwordData.newPassword ||
+      !passwordData.confirmNewPassword
+    ) {
+      setPasswordMessage({ text: "Please complete all password fields.", success: false });
       return;
-    }
+}
 
     const response = await fetch(`${API_URL}/api/User/change-password`, {
       method: "PUT",
@@ -162,7 +182,7 @@ function MyProfile() {
     <div className={`ticket-card ${expired ? "expired" : ""}`}>
       {ticket.firstImage && (
         <img
-          src={`${API_URL}/${ticket.firstImage}`}
+          src={buildImageUrl(ticket.firstImage)}
           alt={ticket.attractionName}
           className="ticket-image"
         />
@@ -210,8 +230,9 @@ function MyProfile() {
 
         {!isEditing ? (
           <>
-            <p><strong>Name:</strong> {user?.name || "Unknown"}</p>
-            <p><strong>Email:</strong> {user?.email || "Unknown"}</p>
+            <p><strong>Name:</strong> {currentUser?.name || "Unknown"}</p>
+            <p><strong>Surname:</strong> {currentUser?.surname || "Unknown"}</p>
+            <p><strong>Email:</strong> {currentUser?.email || "Unknown"}</p>
             <button
               className="edit-btn"
               onClick={() => {
@@ -270,7 +291,7 @@ function MyProfile() {
         )}
       </section>
 
-      {/* SCHIMBARE PAROLĂ */}
+      {/* SCHIMBARE PAROLA */}
       <section className="profile-section">
         <h2>Change Password</h2>
         {passwordMessage.text && (
