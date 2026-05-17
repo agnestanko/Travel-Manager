@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import "./SearchBar.css";
 import { API_URL } from "../services/api";
 
 function SearchBar({ setResults }) {
-  const [query, setQuery] = useState("");
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
-  const [location, setLocation] = useState("");
-  const [sort, setSort] = useState("none");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [query, setQuery] = useState(searchParams.get("query") || "");
+  const [minPrice, setMinPrice] = useState(searchParams.get("minPrice") || "");
+  const [maxPrice, setMaxPrice] = useState(searchParams.get("maxPrice") || "");
+  const [location, setLocation] = useState(searchParams.get("location") || "");
+  const [sort, setSort] = useState(searchParams.get("sort") || "none");
   const [showFilter, setShowFilter] = useState(false);
-
   const locations = ["Oradea", "Paris", "Bucuresti"];
-
   const hasActiveFilters =
     query.trim() !== "" ||
     minPrice !== "" ||
@@ -31,6 +31,8 @@ function SearchBar({ setResults }) {
         if (location !== "") params.append("location", location);
         if (sort !== "none") params.append("sort", sort);
 
+        setSearchParams(params, { replace: true });
+
         const response = await fetch(`${API_URL}/api/Search?${params.toString()}`);
 
         if (!response.ok) {
@@ -46,8 +48,8 @@ function SearchBar({ setResults }) {
     };
 
     fetchResults();
-  }, [query, minPrice, maxPrice, location, sort, setResults]);
-
+  }, [query, minPrice, maxPrice, location, sort, setResults, setSearchParams]);
+  
   const toggleSort = () => {
     if (sort === "none" || sort === "desc") setSort("asc");
     else setSort("desc");
