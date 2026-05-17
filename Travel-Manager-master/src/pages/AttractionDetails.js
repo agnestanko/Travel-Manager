@@ -157,6 +157,16 @@ function AttractionDetails() {
     entryDate: ""
   });
 
+  const buildImageUrl = (path) => {
+  if (!path) return "/placeholder.jpg";
+
+  if (path.startsWith("http")) {
+    return path;
+  }
+
+  return `${API_URL}${path.startsWith("/") ? path : `/${path}`}`;
+  };
+
   useEffect(() => {
     const fetchAttraction = async () => {
       try {
@@ -169,7 +179,7 @@ function AttractionDetails() {
 
         // După ce am primit atracția, extragem imaginile
         if (attractionData && attractionData.images) {
-          const imageUrls = attractionData.images.map(img => `${API_URL}/${img.imagePath}`);
+          const imageUrls = attractionData.images.map((img) => buildImageUrl(img.imagePath));
           setImages(imageUrls);
         } else {
           setImages([]);
@@ -248,14 +258,14 @@ function AttractionDetails() {
   };
 
   const handleBuyTicket = () => {
-    if (!isLoggedIn()) {
-      navigate("/auth");
-      return;
-    }
+  if (!isLoggedIn()) {
+    navigate(`/auth?redirect=/attraction/${id}`);
+    return;
+  }
 
-    setBuyError("");
-    setShowModal(true);
-  };
+  setBuyError("");
+  setShowModal(true);
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();

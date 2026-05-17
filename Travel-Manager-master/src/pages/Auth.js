@@ -6,7 +6,7 @@ import "./Auth.css";
 function Auth() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-
+  const redirectPath = searchParams.get("redirect") || "/";
   const [isRegister, setIsRegister] = useState(
     searchParams.get("mode") === "register"
   );
@@ -58,7 +58,7 @@ function Auth() {
         localStorage.setItem("user", JSON.stringify(data.user));
 
         alert("Login successful!");
-        navigate("/");
+        navigate(redirectPath);
       }
     } else {
       alert(isRegister ? "Registration failed." : "Invalid email or password.");
