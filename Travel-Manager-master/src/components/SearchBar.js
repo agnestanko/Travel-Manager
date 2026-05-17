@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import "./SearchBar.css";
 import { API_URL } from "../services/api";
 
@@ -11,6 +12,13 @@ function SearchBar({ setResults }) {
   const [showFilter, setShowFilter] = useState(false);
 
   const locations = ["Oradea", "Paris", "Bucuresti"];
+
+  const hasActiveFilters =
+    query.trim() !== "" ||
+    minPrice !== "" ||
+    maxPrice !== "" ||
+    location !== "" ||
+    sort !== "none";
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -54,79 +62,119 @@ function SearchBar({ setResults }) {
   };
 
   return (
-    <div className="wrapper">
+    <motion.div
+      className="wrapper"
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, ease: "easeOut" }}
+    >
       <div className="topRow">
-        <input
-          className="input"
-          placeholder="Search events..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+        <div className="searchInputWrapper">
+          <span className="searchIcon">⌕</span>
+          <input
+            className="input"
+            placeholder="Search attractions..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
 
         <div
           className="dropdownWrapper"
           onMouseEnter={() => setShowFilter(true)}
           onMouseLeave={() => setShowFilter(false)}
         >
-          <button type="button" className="iconBtn">Filter ▼</button>
+          <motion.button
+            type="button"
+            className={`iconBtn ${showFilter ? "activeBtn" : ""}`}
+            whileHover={{ y: -2 }}
+            whileTap={{ scale: 0.96 }}
+          >
+            Filter <span className="chevron">▼</span>
+          </motion.button>
 
-          {showFilter && (
-            <div className="dropdown">
-              <div className="filterSection">
-                <label>Price range</label>
-                <div className="priceRange">
-                  <input
-                    type="number"
-                    placeholder="Min"
-                    value={minPrice}
-                    onChange={(e) => setMinPrice(e.target.value)}
-                    className="priceInput"
-                  />
-
-                  <input
-                    type="number"
-                    placeholder="Max"
-                    value={maxPrice}
-                    onChange={(e) => setMaxPrice(e.target.value)}
-                    className="priceInput"
-                  />
-                </div>
-              </div>
-
-              <div className="filterSection">
-                <label>Location</label>
-                <select
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  className="selectInput"
-                >
-                  <option value="">All locations</option>
-                  {locations.map((loc) => (
-                    <option key={loc} value={loc}>{loc}</option>
-                  ))}
-                </select>
-              </div>
-
-              <button
-                type="button"
-                className="clearBtn"
-                onClick={clearFilters}
+          <AnimatePresence>
+            {showFilter && (
+              <motion.div
+                className="dropdown"
+                initial={{ opacity: 0, y: -10, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.96 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
               >
-                Clear all filters
-              </button>
-            </div>
-          )}
+                <div className="filterSection">
+                  <label>Price range</label>
+                  <div className="priceRange">
+                    <input
+                      type="number"
+                      placeholder="Min"
+                      value={minPrice}
+                      onChange={(e) => setMinPrice(e.target.value)}
+                      className="priceInput"
+                    />
+
+                    <input
+                      type="number"
+                      placeholder="Max"
+                      value={maxPrice}
+                      onChange={(e) => setMaxPrice(e.target.value)}
+                      className="priceInput"
+                    />
+                  </div>
+                </div>
+
+                <div className="filterSection">
+                  <label>Location</label>
+                  <select
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    className="selectInput"
+                  >
+                    <option value="">All locations</option>
+                    {locations.map((loc) => (
+                      <option key={loc} value={loc}>
+                        {loc}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <button
+                  type="button"
+                  className="clearBtn"
+                  onClick={clearFilters}
+                >
+                  Clear all filters
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        <button
+        <motion.button
           type="button"
-          className="iconBtn"
+          className={`iconBtn ${sort !== "none" ? "activeBtn" : ""}`}
           onClick={toggleSort}
+          whileHover={{ y: -2 }}
+          whileTap={{ scale: 0.96 }}
         >
           Sort by price {sort === "asc" ? "↑" : sort === "desc" ? "↓" : ""}
-        </button>
+        </motion.button>
       </div>
-    </div>
+
+      {hasActiveFilters && (
+        <motion.div
+          className="activeFilters"
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <span>Active search</span>
+          <button type="button" onClick={clearFilters}>
+            Reset
+          </button>
+        </motion.div>
+      )}
+    </motion.div>
   );
 }
 

@@ -1,88 +1,67 @@
+.resultsWrapper {
+  width: 100%;
+  max-width: 920px;
+  margin-top: 12px;
+}
+
+.resultsList {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .resultItem {
-  padding: 40px 20px;
-  border-bottom: 1px solid #eeeeee;
-  transition: all 0.2s ease;
+  width: 100%;
+  padding: 18px 22px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
   cursor: pointer;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
 }
 
 .resultItem:hover {
-  background: #ddf1f0;
-  box-shadow: inset 3px 0 0 #007bff;
+  background: #f8fbff;
+  border-color: rgba(37, 99, 235, 0.32);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.13);
 }
 
 .resultName {
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 5px;
-  font-size: 20px;
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
 }
 
 .resultDetails {
   display: flex;
-  gap: 15px;
-  font-size: 18px;
-  color: #666;
+  gap: 18px;
+  align-items: center;
+  font-size: 15px;
+  color: #64748b;
 }
 
 .resultDetails span {
   display: flex;
   align-items: center;
-  gap: 10px;
-}
-
-.resultsWrapper {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-.resultsList {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  background: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
-}
-
-.noResultsMessage h3 {
-  margin: 0 0 5px 0;
-  color: #343a40;
-  font-size: 18px;
+  gap: 8px;
 }
 
 .noResultsMessage {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  background: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 12px;
-  padding: 20px 25px;
-  margin-top: 20px;
-  animation: fadeIn 0.3s ease-in;
-   height: 100%;  
+  width: 100%;
+  text-align: center;
+  padding: 18px 22px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  color: #64748b;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
 }
 
-.resultsWrapper {
-  width: 1200px;
-  min-height: 400px;              
-  overflow-y: auto;           
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-  margin-top: 20px;
-  transition: all 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;    
-  overflow-y: auto;
-}
-
-.resultsList {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
+.noResultsMessage h3 {
+  margin: 0;
+  color: #334155;
+  font-size: 17px;
 }

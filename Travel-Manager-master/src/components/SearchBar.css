@@ -1,48 +1,82 @@
 .wrapper {
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  margin-top: 20px;
+  gap: 14px;
 }
 
-/* Randul principal (input + butoane) */
 .topRow {
+  width: 100%;
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
-/* Input cautare */
+.searchInputWrapper {
+  position: relative;
+  width: min(570px, 60vw);
+}
+
+.searchIcon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #0284c7;
+  font-size: 18px;
+  font-weight: 800;
+  pointer-events: none;
+}
+
 .input {
-  width: 570px;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
+  width: 100%;
+  padding: 13px 16px 13px 42px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(255, 255, 255, 0.92);
+  color: #0f172a;
   font-size: 14px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
-/* Focus pe input text field*/
+.input::placeholder {
+  color: #94a3b8;
+}
+
 .input:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+  border-color: rgba(2, 132, 199, 0.65);
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.16);
 }
 
 .iconBtn {
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  background: white;
+  padding: 13px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(255, 255, 255, 0.92);
+  color: #0f172a;
   cursor: pointer;
-  transition: 0.2s;
   font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-/* Efect buton la atingere */
-.iconBtn:hover {
-  background: #f2f2f2;
-  transform: scale(1.05);
+.iconBtn:hover,
+.iconBtn.activeBtn {
+  background: #e0f7ff;
+  border-color: rgba(2, 132, 199, 0.55);
+  color: #0284c7;
+}
+
+.chevron {
+  font-size: 11px;
+  margin-left: 4px;
 }
 
 .dropdownWrapper {
@@ -52,105 +86,138 @@
 
 .dropdown {
   position: absolute;
-  top: 45px;
-  left: 0;
-  background: white;
-  border: 1px solid #ddd;
-  padding: 15px;
-  border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-  z-index: 100;
-  min-width: 250px;
+  top: 54px;
+  left: 50%;
+  transform-origin: top center;
+  translate: -50% 0;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  padding: 18px;
+  border-radius: 20px;
+  box-shadow: 0 24px 55px rgba(15, 23, 42, 0.16);
+  backdrop-filter: blur(16px);
+  z-index: 120;
+  min-width: 290px;
 }
 
 .filterSection {
-  margin-bottom: 15px;
+  margin-bottom: 16px;
 }
 
 .filterSection label {
   display: block;
-  margin-bottom: 8px;
-  font-weight: 500;
+  margin-bottom: 9px;
+  font-weight: 800;
   font-size: 13px;
-  color: #555;
+  color: #334155;
 }
 
 .priceRange {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .priceInput {
-  flex: 1;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.38);
   font-size: 14px;
+  color: #0f172a;
+  background: #ffffff;
 }
 
 .priceInput:focus {
   outline: none;
-  border-color: #007bff;
+  border-color: rgba(2, 132, 199, 0.65);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.14);
 }
 
-/* Select locatie */
 .selectInput {
   width: 100%;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.38);
   font-size: 14px;
   background: white;
   cursor: pointer;
+  color: #0f172a;
 }
 
 .selectInput:focus {
   outline: none;
-  border-color: #007bff;
+  border-color: rgba(2, 132, 199, 0.65);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.14);
 }
 
-/* Buton reset filtre */
 .clearBtn {
   width: 100%;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #dc3545;
-  background: white;
-  color: #dc3545;
+  padding: 11px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  background: #fff1f2;
+  color: #be123c;
   cursor: pointer;
   font-size: 13px;
-  transition: 0.2s;
-  margin-top: 5px;
+  font-weight: 800;
+  transition: 0.2s ease;
 }
 
 .clearBtn:hover {
-  background: #dc3545;
+  background: #be123c;
   color: white;
 }
 
-.noResultsMessage {
+.activeFilters {
   display: flex;
   align-items: center;
-  gap: 15px;
-  background: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 12px;
-  padding: 20px 25px;
-  margin-top: 20px;
-  animation: fadeIn 0.3s ease-in;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(224, 247, 255, 0.85);
+  color: #0369a1;
+  font-size: 13px;
+  font-weight: 800;
 }
 
+.activeFilters button {
+  border: none;
+  background: white;
+  color: #0284c7;
+  border-radius: 999px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+}
 
+.activeFilters button:hover {
+  background: #0284c7;
+  color: white;
+}
 
-/* Animatie aparitie cu slide usor de sus */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
+@media (max-width: 800px) {
+  .topRow {
+    flex-direction: column;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  .searchInputWrapper {
+    width: 100%;
+  }
+
+  .iconBtn {
+    width: 100%;
+  }
+
+  .dropdownWrapper {
+    width: 100%;
+  }
+
+  .dropdown {
+    left: 0;
+    translate: 0 0;
+    width: 100%;
+    min-width: unset;
   }
 }

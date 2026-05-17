@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import "./ResultCard.css";
 
 /**
@@ -8,17 +8,24 @@ import "./ResultCard.css";
  */
 function ResultCard({ item, onClick }) {
   return (
-    <div
+    <motion.div
       className="resultItem"
       onClick={onClick}
+      variants={{
+        hidden: { opacity: 0, y: 25 },
+        visible: { opacity: 1, y: 0 }
+      }}
+      transition={{ duration: 0.45, ease: "easeOut" }}
+      whileHover={{ y: -6, scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
     >
       <h3 className="resultName">{item.name}</h3>
 
       <div className="resultDetails">
         <span>{item.location}</span>
-        <span>{item.entryPrice} RON</span> 
+        <span>{item.entryPrice} RON</span>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

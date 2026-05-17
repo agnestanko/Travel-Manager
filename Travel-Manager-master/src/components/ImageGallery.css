@@ -2,48 +2,66 @@
   position: relative;
   width: 100%;
   height: 520px;
-  border-radius: 12px;
+  border-radius: 28px;
   overflow: hidden;
-  background: #f3f3f3;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .gallery-main-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  background: #f1f5f9;
+  display: block;
 }
 
 .gallery-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
+  z-index: 5;
 
-  width: 40px;
-  height: 40px;
+  width: 46px;
+  height: 46px;
   border: none;
   border-radius: 50%;
 
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.9);
   cursor: pointer;
-  font-size: 24px;
+  font-size: 26px;
+  font-weight: 700;
+  color: #0f172a;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.16);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .gallery-arrow.left {
-  left: 15px;
+  left: 18px;
 }
 
 .gallery-arrow.right {
-  right: 15px;
+  right: 18px;
 }
 
 .gallery-dots {
   position: absolute;
-  bottom: 15px;
+  bottom: 18px;
   left: 50%;
   transform: translateX(-50%);
+  z-index: 5;
 
   display: flex;
   gap: 8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(10px);
 }
 
 .dot {
@@ -51,12 +69,12 @@
   height: 9px;
   border: none;
   border-radius: 50%;
-  background: #ddd;
+  background: #cbd5e1;
   cursor: pointer;
 }
 
 .active-dot {
-  background: #007bff;
+  background: #0284c7;
 }
 
 .gallery-empty {
@@ -68,4 +86,16 @@
   background: #f3f3f3;
   border-radius: 12px;
   color: #666;
+}
+
+@media (max-width: 900px) {
+  .image-gallery {
+    height: 380px;
+  }
+}
+
+@media (max-width: 600px) {
+  .image-gallery {
+    height: 300px;
+  }
 }

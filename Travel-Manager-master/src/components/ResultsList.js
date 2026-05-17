@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import ResultCard from "./ResultCard";
 
@@ -6,17 +7,34 @@ function ResultsList({ results }) {
 
   if (!results || results.length === 0) {
     return (
-      <div className="resultsWrapper">
+      <motion.div
+        className="resultsWrapper"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.35 }}
+      >
         <div className="noResultsMessage">
           <h3>No events found</h3>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   return (
     <div className="resultsWrapper">
-      <div className="resultsList">
+      <motion.div
+        className="resultsList"
+        initial="hidden"
+        animate="visible"
+        variants={{
+          hidden: {},
+          visible: {
+            transition: {
+              staggerChildren: 0.08
+            }
+          }
+        }}
+      >
         {results.map((item) => (
           <ResultCard
             key={item.id}
@@ -24,7 +42,7 @@ function ResultsList({ results }) {
             onClick={() => navigate(`/attraction/${item.id}`)}
           />
         ))}
-      </div>
+      </motion.div>
     </div>
   );
 }
