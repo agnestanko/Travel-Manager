@@ -15,7 +15,6 @@ namespace Travel_Manager_API.Controllers
             _context = context;
         }
 
-        // GET: api/Attraction
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Attraction>>> GetAll()
         {
@@ -24,7 +23,6 @@ namespace Travel_Manager_API.Controllers
                 .ToListAsync();
         }
 
-        // GET: api/Attraction/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Attraction>> GetById(int id)
         {
@@ -38,21 +36,20 @@ namespace Travel_Manager_API.Controllers
             return attraction;
         }
 
-        // GET: api/Attraction/5/available-dates
-        // Returneaza doar datele viitoare (>= azi) pentru atractia respectiva
         [HttpGet("{id}/available-dates")]
         public async Task<ActionResult<IEnumerable<string>>> GetAvailableDates(int id)
         {
+            var today = DateTime.UtcNow.Date;
+
             var dates = await _context.AvailableDates
-                .Where(d => d.AttractionId == id && d.Date >= DateTime.Today)
+                .Where(d => d.AttractionId == id && d.Date.ToUniversalTime() >= today)
                 .OrderBy(d => d.Date)
-                .Select(d => d.Date.ToString("yyyy-MM-dd"))
+                .Select(d => d.Date.ToUniversalTime().ToString("yyyy-MM-dd"))
                 .ToListAsync();
 
             return Ok(dates);
         }
 
-        // POST: api/Attraction
         [HttpPost]
         public async Task<ActionResult<Attraction>> Create(Attraction attraction)
         {

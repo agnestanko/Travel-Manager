@@ -57,6 +57,12 @@ function Header() {
                     My Profile
                   </button>
                 )}
+
+                {loggedIn && user?.isAdmin && (
+                  <button onClick={() => goToPage("/admin")}>
+                    Admin Panel
+                  </button>
+                )}
               </motion.div>
             )}
           </AnimatePresence>

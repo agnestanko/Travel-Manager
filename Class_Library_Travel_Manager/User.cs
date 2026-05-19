@@ -9,6 +9,7 @@ namespace Class_Library_Travel_Manager
         public string Surname { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
+        public bool IsAdmin { get; set; }
         public ICollection<Booking> Bookings { get; set; }
         public ICollection<Reviews> Reviews { get; set; }
         public ICollection<Attraction> FavoriteAttractions { get; set; }
@@ -21,6 +22,7 @@ namespace Class_Library_Travel_Manager
             Surname = surname;
             Email = email;
             Password = password;
+            IsAdmin = false;
             Bookings = new List<Booking>();
             Reviews = new List<Reviews>();
             FavoriteAttractions = new List<Attraction>();

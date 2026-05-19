@@ -9,15 +9,16 @@ function SearchBar({ setResults }) {
   const [query, setQuery] = useState(searchParams.get("query") || "");
   const [minPrice, setMinPrice] = useState(searchParams.get("minPrice") || "");
   const [maxPrice, setMaxPrice] = useState(searchParams.get("maxPrice") || "");
-  const [location, setLocation] = useState(searchParams.get("location") || "");
+  const [type, setType] = useState(searchParams.get("type") || "");
   const [sort, setSort] = useState(searchParams.get("sort") || "none");
   const [showFilter, setShowFilter] = useState(false);
-  const locations = ["Oradea", "Paris", "Bucuresti"];
+  const types = ["Istoric", "Natură", "Relaxare", "Distracție"];
+
   const hasActiveFilters =
     query.trim() !== "" ||
     minPrice !== "" ||
     maxPrice !== "" ||
-    location !== "" ||
+    type !== "" ||
     sort !== "none";
 
   useEffect(() => {
@@ -28,7 +29,7 @@ function SearchBar({ setResults }) {
         if (query.trim() !== "") params.append("query", query);
         if (minPrice !== "") params.append("minPrice", minPrice);
         if (maxPrice !== "") params.append("maxPrice", maxPrice);
-        if (location !== "") params.append("location", location);
+        if (type !== "") params.append("type", type);
         if (sort !== "none") params.append("sort", sort);
 
         setSearchParams(params, { replace: true });
@@ -48,8 +49,8 @@ function SearchBar({ setResults }) {
     };
 
     fetchResults();
-  }, [query, minPrice, maxPrice, location, sort, setResults, setSearchParams]);
-  
+  }, [query, minPrice, maxPrice, type, sort, setResults, setSearchParams]);
+
   const toggleSort = () => {
     if (sort === "none" || sort === "desc") setSort("asc");
     else setSort("desc");
@@ -58,7 +59,7 @@ function SearchBar({ setResults }) {
   const clearFilters = () => {
     setMinPrice("");
     setMaxPrice("");
-    setLocation("");
+    setType("");
     setQuery("");
     setSort("none");
   };
@@ -126,16 +127,16 @@ function SearchBar({ setResults }) {
                 </div>
 
                 <div className="filterSection">
-                  <label>Location</label>
+                  <label>Type</label>
                   <select
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
+                    value={type}
+                    onChange={(e) => setType(e.target.value)}
                     className="selectInput"
                   >
-                    <option value="">All locations</option>
-                    {locations.map((loc) => (
-                      <option key={loc} value={loc}>
-                        {loc}
+                    <option value="">All types</option>
+                    {types.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
                       </option>
                     ))}
                   </select>

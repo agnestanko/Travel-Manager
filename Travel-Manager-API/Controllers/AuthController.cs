@@ -1,13 +1,11 @@
 ﻿using Class_Library_Travel_Manager;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using static BCrypt.Net.BCrypt;
 
 namespace Travel_Manager_API.Controllers
 {
@@ -46,13 +44,13 @@ namespace Travel_Manager_API.Controllers
 
             if (!BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
                 return Unauthorized("Invalid email or password.");
-            
+
             string token = GenerateJwtToken(user);
 
             return Ok(new
             {
                 token,
-                user = new { id = user.Id, name = user.Name, email = user.Email }
+                user = new { id = user.Id, name = user.Name, surname = user.Surname, email = user.Email, isAdmin = user.IsAdmin }
             });
         }
 
@@ -68,7 +66,7 @@ namespace Travel_Manager_API.Controllers
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.Name, user.Name),
                 new Claim("surname", user.Surname)
-    };
+            };
 
             var token = new JwtSecurityToken(
                 issuer: jwtSettings.Issuer,
@@ -103,6 +101,4 @@ namespace Travel_Manager_API.Controllers
         public string Audience { get; set; }
         public int ExpirationInMinutes { get; set; }
     }
-
-
 }

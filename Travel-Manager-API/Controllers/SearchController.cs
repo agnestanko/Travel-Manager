@@ -15,26 +15,28 @@ namespace Travel_Manager_API.Controllers
             _context = context;
         }
 
-        // GET: api/search?query=ceva
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Attraction>>> Search(
         [FromQuery] string? query = null,
         [FromQuery] decimal? minPrice = null,
         [FromQuery] decimal? maxPrice = null,
-        [FromQuery] string? location = null,
+        [FromQuery] string? type = null,
         [FromQuery] string? sort = null)
         {
             var queryable = _context.Attractions.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(query))
-                queryable = queryable.Where(a => a.Name.Contains(query) || a.Description.Contains(query));
+                queryable = queryable.Where(a =>
+                    a.Name.ToLower().Contains(query.ToLower()) ||
+                    a.Description.ToLower().Contains(query.ToLower()) ||
+                    a.Location.ToLower().Contains(query.ToLower()));
 
             if (minPrice.HasValue)
                 queryable = queryable.Where(a => a.EntryPrice >= minPrice.Value);
             if (maxPrice.HasValue)
                 queryable = queryable.Where(a => a.EntryPrice <= maxPrice.Value);
-            if (!string.IsNullOrWhiteSpace(location))
-                queryable = queryable.Where(a => a.Location == location);
+            if (!string.IsNullOrWhiteSpace(type))
+                queryable = queryable.Where(a => a.Type == type);
 
             queryable = sort switch
             {

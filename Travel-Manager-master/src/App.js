@@ -2,9 +2,9 @@ import Home from "./pages/Home";
 import AttractionDetails from "./pages/AttractionDetails";
 import Auth from "./pages/Auth";
 import MyProfile from "./pages/MyProfile";
+import Admin from "./pages/Admin";
 import Header from "./components/Header";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-
 
 /**
  * Componenta principala a aplicatiei
@@ -25,6 +25,9 @@ function App() {
 
           {/* Pagina pentru autentificare */}
           <Route path="/auth" element={<Auth />} />
+
+          {/* Pagina de admin - accesibila doar la /admin */}
+          <Route path="/admin" element={<Admin />} />
         </Routes>
     </BrowserRouter>
   );
