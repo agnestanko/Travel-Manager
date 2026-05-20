@@ -2,7 +2,7 @@ import SearchBar from "../components/SearchBar";
 import ResultsList from "../components/ResultsList";
 import MotionSection from "../components/MotionSection";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_URL } from "../services/api";
 import "./Home.css";
@@ -12,6 +12,7 @@ function Home() {
   const [gallery, setGallery] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const galleryRef = useRef(null);
 
   const navigate = useNavigate();
 
@@ -23,6 +24,17 @@ function Home() {
     }
 
     return `${API_URL}${path.startsWith("/") ? path : `/${path}`}`;
+  };
+
+  const scrollGallery = (direction) => {
+    if (!galleryRef.current) return;
+
+    const scrollAmount = 320;
+
+    galleryRef.current.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth"
+    });
   };
 
   useEffect(() => {
@@ -103,31 +115,52 @@ function Home() {
         {loading && <p className="status-message">Loading attractions...</p>}
         {error && <p className="error">{error}</p>}
 
-        <div className="home-gallery-grid">
-          {gallery.map((item, index) => (
-            <motion.div
-              className="home-gallery-card"
-              key={item.id}
-              onClick={() => navigate(`/attraction/${item.id}`)}
-              initial={{ opacity: 0, y: 35 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.55, delay: index * 0.08 }}
-              whileHover={{ y: -10, scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <div className="gallery-image-wrapper">
-                <img
-                  src={item.firstImage ? buildImageUrl(item.firstImage) : "/placeholder.jpg"}
-                  alt={item.name}
-                />
-              </div>
-              <div className="gallery-card-content">
-                <p>{item.name}</p>
-                <span>View details</span>
-              </div>
-            </motion.div>
-          ))}
+        <div className="gallery-scroll-section">
+          <button
+            type="button"
+            className="gallery-scroll-btn gallery-scroll-left"
+            onClick={() => scrollGallery("left")}
+            aria-label="Scroll popular attractions left"
+          >
+            ‹
+          </button>
+
+          <div className="home-gallery-grid" ref={galleryRef}>
+            {gallery.slice(0, 8).map((item, index) => (
+              <motion.div
+                className="home-gallery-card"
+                key={item.id}
+                onClick={() => navigate(`/attraction/${item.id}`)}
+                initial={{ opacity: 0, y: 35 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.55, delay: index * 0.08 }}
+                whileHover={{ y: -10, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="gallery-image-wrapper">
+                  <img
+                    src={item.firstImage ? buildImageUrl(item.firstImage) : "/placeholder.jpg"}
+                    alt={item.name}
+                  />
+                </div>
+
+                <div className="gallery-card-content">
+                  <p>{item.name}</p>
+                  <span>View details</span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            className="gallery-scroll-btn gallery-scroll-right"
+            onClick={() => scrollGallery("right")}
+            aria-label="Scroll popular attractions right"
+          >
+            ›
+          </button>
         </div>
       </MotionSection>
 

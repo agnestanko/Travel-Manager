@@ -15,12 +15,25 @@ namespace Travel_Manager_API.Controllers
             _context = context;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Attraction>>> GetAll()
+       [HttpGet]
+        public async Task<ActionResult<IEnumerable<object>>> GetAll()
         {
-            return await _context.Attractions
-                .Include(a => a.Images)
+            // Returnam atractiile impreuna cu prima imagine pentru cardurile din lista
+            var attractions = await _context.Attractions
+                .Select(a => new
+                {
+                    a.Id,
+                    a.Name,
+                    a.Description,
+                    a.Location,
+                    a.Type,
+                    a.EntryPrice,
+                    a.Capacity,
+                    FirstImage = a.Images!.Any() ? a.Images.First().ImagePath : null
+                })
                 .ToListAsync();
+
+            return Ok(attractions);
         }
 
         [HttpGet("{id}")]

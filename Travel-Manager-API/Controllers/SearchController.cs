@@ -16,7 +16,7 @@ namespace Travel_Manager_API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Attraction>>> Search(
+        public async Task<ActionResult<IEnumerable<object>>> Search(
         [FromQuery] string? query = null,
         [FromQuery] decimal? minPrice = null,
         [FromQuery] decimal? maxPrice = null,
@@ -45,8 +45,21 @@ namespace Travel_Manager_API.Controllers
                 _ => queryable
             };
 
-            var results = await queryable.ToListAsync();
-            return Ok(results);
+           var results = await queryable
+            .Select(a => new
+            {
+                a.Id,
+                a.Name,
+                a.Description,
+                a.Location,
+                a.Type,
+                a.EntryPrice,
+                a.Capacity,
+                FirstImage = a.Images!.Any() ? a.Images.First().ImagePath : null
+            })
+            .ToListAsync();
+
+        return Ok(results);
         }
     }
 }

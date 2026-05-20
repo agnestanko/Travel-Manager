@@ -6,14 +6,40 @@
 
 .resultsList {
   width: 100%;
+  max-height: 430px;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
+  padding-right: 10px;
+}
+
+/* Scrollbar pentru lista de rezultate */
+.resultsList::-webkit-scrollbar {
+  width: 8px;
+}
+
+.resultsList::-webkit-scrollbar-track {
+  border-radius: 12px;
+  background: rgba(226, 232, 240, 0.8);
+}
+
+.resultsList::-webkit-scrollbar-thumb {
+  border-radius: 12px;
+  background: rgba(37, 99, 235, 0.45);
+}
+
+.resultsList::-webkit-scrollbar-thumb:hover {
+  background: rgba(37, 99, 235, 0.7);
 }
 
 .resultItem {
   width: 100%;
-  padding: 18px 22px;
+  min-height: 190px;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 20px 22px;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.96);
   border: 1px solid rgba(148, 163, 184, 0.22);
@@ -28,18 +54,32 @@
   box-shadow: 0 16px 36px rgba(15, 23, 42, 0.13);
 }
 
+.resultImage {
+  width: 240px;
+  height: 145px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: 14px;
+  background: #e2e8f0;
+}
+
+.resultContent {
+  flex: 1;
+  min-width: 0;
+}
+
 .resultName {
-  margin: 0 0 8px;
-  font-size: 18px;
+  margin: 0 0 14px;
+  font-size: 22px;
   font-weight: 800;
   color: #0f172a;
 }
 
 .resultDetails {
   display: flex;
-  gap: 18px;
+  gap: 22px;
   align-items: center;
-  font-size: 15px;
+  font-size: 16px;
   color: #64748b;
 }
 
@@ -64,4 +104,28 @@
   margin: 0;
   color: #334155;
   font-size: 17px;
+}
+
+/* Pe ecrane mici cardul se aseaza vertical */
+@media (max-width: 768px) {
+  .resultsList {
+    max-height: 520px;
+    padding-right: 6px;
+  }
+
+  .resultItem {
+    flex-direction: column;
+    align-items: flex-start;
+    min-height: auto;
+  }
+
+  .resultImage {
+    width: 100%;
+    height: 190px;
+  }
+
+  .resultDetails {
+    width: 100%;
+    justify-content: space-between;
+  }
 }
