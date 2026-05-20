@@ -356,14 +356,25 @@ function AttractionDetails() {
               <strong>{price} RON</strong>
             </div>
 
-            <motion.button
-              className="buy-ticket-btn"
-              onClick={handleBuyTicket}
-              whileHover={{ y: -3, scale: 1.02 }}
-              whileTap={{ scale: 0.97 }}
-            >
-              Buy ticket
-            </motion.button>
+                        {user?.isAdmin ? (
+              <motion.button
+                className="admin-manage-attraction-btn"
+                onClick={() => navigate("/admin", { state: { editAttractionId: Number(id) } })}
+                whileHover={{ y: -3, scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+              >
+                Manage in Admin Panel
+              </motion.button>
+            ) : (
+              <motion.button
+                className="buy-ticket-btn"
+                onClick={handleBuyTicket}
+                whileHover={{ y: -3, scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+              >
+                Buy ticket
+              </motion.button>
+            )}
           </motion.div>
         </motion.div>
 

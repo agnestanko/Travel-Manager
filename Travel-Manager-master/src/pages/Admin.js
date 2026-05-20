@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { API_URL } from "../services/api";
 import { isLoggedIn, getCurrentUser } from "../services/authService";
@@ -83,6 +83,7 @@ const emptyForm = {
 
 function Admin() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [attractions, setAttractions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(emptyForm);
@@ -168,6 +169,25 @@ function Admin() {
     setMessage({ text: "", success: false });
   };
 
+  useEffect(() => {
+    const editAttractionId = location.state?.editAttractionId;
+
+    if (!editAttractionId || attractions.length === 0) {
+      return;
+    }
+
+    const attractionToEdit = attractions.find(
+      (attraction) => attraction.id === Number(editAttractionId)
+    );
+
+    if (attractionToEdit) {
+      handleEdit(attractionToEdit);
+
+      // Curatam state-ul ca formularul sa nu se redeschida automat la refresh intern
+      navigate("/admin", { replace: true, state: null });
+    }
+  }, [location.state, attractions, navigate]);
+
   const handleNew = () => {
     setEditingId(null);
     setForm(emptyForm);
@@ -234,18 +254,76 @@ function Admin() {
     a.type.toLowerCase().includes(search.toLowerCase())
   );
 
-  return (
+    const totalImages = attractions.reduce(
+      (total, attraction) => total + (attraction.images?.length || 0),
+      0
+    );
+
+    const totalAvailableDates = attractions.reduce(
+      (total, attraction) => total + (attraction.availableDates?.length || 0),
+      0
+    );
+
+    const averagePrice =
+      attractions.length > 0
+        ? Math.round(
+            attractions.reduce(
+              (total, attraction) => total + Number(attraction.entryPrice || 0),
+              0
+            ) / attractions.length
+          )
+        : 0;
+
+    return (
     <div className="admin-page">
-      <div className="admin-header">
-        <h1>Admin Panel</h1>
+      <motion.div
+        className="admin-hero"
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: "easeOut" }}
+      >
+        <div>
+          <span className="admin-mode-badge">Administrator mode</span>
+          <h1>Admin Dashboard</h1>
+          <p>
+            Manage attractions, images, prices and available dates from one clean workspace.
+          </p>
+        </div>
+
         <motion.button
-          className="admin-btn-primary"
+          className="admin-btn-primary admin-hero-action"
           onClick={handleNew}
-          whileHover={{ y: -2 }}
+          whileHover={{ y: -2, scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
         >
           + Add Attraction
         </motion.button>
+      </motion.div>
+
+      <div className="admin-stats-grid">
+        <motion.div className="admin-stat-card" whileHover={{ y: -6 }}>
+          <span>Total attractions</span>
+          <strong>{attractions.length}</strong>
+          <p>Items available in the platform</p>
+        </motion.div>
+
+        <motion.div className="admin-stat-card" whileHover={{ y: -6 }}>
+          <span>Uploaded images</span>
+          <strong>{totalImages}</strong>
+          <p>Photos connected to attractions</p>
+        </motion.div>
+
+        <motion.div className="admin-stat-card" whileHover={{ y: -6 }}>
+          <span>Available dates</span>
+          <strong>{totalAvailableDates}</strong>
+          <p>Bookable dates configured</p>
+        </motion.div>
+
+        <motion.div className="admin-stat-card" whileHover={{ y: -6 }}>
+          <span>Average price</span>
+          <strong>{averagePrice} RON</strong>
+          <p>Average entry price</p>
+        </motion.div>
       </div>
 
       {message.text && (
@@ -368,19 +446,30 @@ function Admin() {
       </AnimatePresence>
 
       {/* SEARCHBAR */}
-      <div className="admin-search">
-        <input
-          placeholder="Search attractions by name, location or type..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
+            <section className="admin-management-card">
+        <div className="admin-management-header">
+          <div>
+            <span>Management</span>
+            <h2>Attractions list</h2>
+          </div>
 
-      {/* LISTA ATRACTII */}
-      {loading ? (
-        <p className="admin-loading">Loading attractions...</p>
-      ) : (
-        <div className="admin-attractions-list">
+          <p>{filteredAttractions.length} results</p>
+        </div>
+
+        {/* SEARCHBAR */}
+        <div className="admin-search">
+          <input
+            placeholder="Search attractions by name, location or type..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
+        {/* LISTA ATRACTII */}
+        {loading ? (
+          <p className="admin-loading">Loading attractions...</p>
+        ) : (
+          <div className="admin-attractions-list">
           {filteredAttractions.length === 0 ? (
             <p className="admin-loading">No attractions found.</p>
           ) : (
@@ -392,14 +481,20 @@ function Admin() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                {a.images?.[0] && (
-                  <img src={a.images[0].imagePath} alt={a.name} className="admin-card-img" />
-                )}
+                <img
+                  src={a.images?.[0]?.imagePath || "/placeholder.jpg"}
+                  alt={a.name}
+                  className="admin-card-img"
+                />
                 <div className="admin-card-info">
                   <h3>{a.name}</h3>
                   <p>{a.location} · {a.type}</p>
-                  <p>{a.entryPrice} RON · Capacity: {a.capacity}</p>
-                  <p className="admin-card-dates">{a.availableDates?.length || 0} available dates</p>
+
+                  <div className="admin-card-meta">
+                    <span>{a.entryPrice} RON</span>
+                    <span>Capacity: {a.capacity}</span>
+                    <span>{a.availableDates?.length || 0} dates</span>
+                  </div>
                 </div>
                 <div className="admin-card-actions">
                   <button className="admin-btn-edit" onClick={() => handleEdit(a)}>Edit</button>
@@ -408,8 +503,10 @@ function Admin() {
               </motion.div>
             ))
           )}
-        </div>
-      )}
+                  </div>
+        )}
+      </section>
+
       {/* MODAL CONFIRMARE STERGERE */}
       <AnimatePresence>
         {deleteId && (

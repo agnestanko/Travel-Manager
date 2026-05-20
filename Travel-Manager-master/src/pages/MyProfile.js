@@ -46,27 +46,32 @@ function MyProfile() {
     return `${API_URL}${path.startsWith("/") ? path : `/${path}`}`;
   };
 
-  useEffect(() => {
-    if (!isLoggedIn()) {
-      navigate("/auth");
-      return;
-    }
-
-    const fetchTickets = async () => {
-      const response = await fetch(`${API_URL}/api/Tickets/my-tickets`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setTickets(data);
+    useEffect(() => {
+      if (!isLoggedIn()) {
+        navigate("/auth");
+        return;
       }
-    };
 
-    fetchTickets();
-  }, [navigate]);
+      if (currentUser?.isAdmin) {
+        setTickets([]);
+        return;
+      }
+
+      const fetchTickets = async () => {
+        const response = await fetch(`${API_URL}/api/Tickets/my-tickets`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setTickets(data);
+        }
+      };
+
+      fetchTickets();
+    }, [navigate, currentUser]);
 
   useEffect(() => {
     if (tickets.length === 0) return;
@@ -484,44 +489,46 @@ function MyProfile() {
           </div>
         </motion.section>
 
-        <motion.section
-          className="profile-section tickets-section"
-          initial={{ opacity: 0, y: 35 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.55, delay: 0.1, ease: "easeOut" }}
-        >
-          <div className="section-title-row">
-            <div>
-              <span className="section-label">Travel wallet</span>
-              <h2>My Tickets</h2>
+          {!currentUser?.isAdmin && (
+          <motion.section
+            className="profile-section tickets-section"
+            initial={{ opacity: 0, y: 35 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.55, delay: 0.1, ease: "easeOut" }}
+          >
+            <div className="section-title-row">
+              <div>
+                <span className="section-label">Travel wallet</span>
+                <h2>My Tickets</h2>
+              </div>
             </div>
-          </div>
 
-          <div className="ticket-group">
-            <h3>Active tickets</h3>
+            <div className="ticket-group">
+              <h3>Active tickets</h3>
 
-            {activeTickets.length === 0 ? (
-              <p className="empty-ticket-message">No active tickets.</p>
-            ) : (
-              activeTickets.map((ticket) => (
-                <TicketCard key={ticket.id} ticket={ticket} expired={false} />
-              ))
-            )}
-          </div>
+              {activeTickets.length === 0 ? (
+                <p className="empty-ticket-message">No active tickets.</p>
+              ) : (
+                activeTickets.map((ticket) => (
+                  <TicketCard key={ticket.id} ticket={ticket} expired={false} />
+                ))
+              )}
+            </div>
 
-          <div className="ticket-group">
-            <h3>Expired tickets</h3>
+            <div className="ticket-group">
+              <h3>Expired tickets</h3>
 
-            {expiredTickets.length === 0 ? (
-              <p className="empty-ticket-message">No expired tickets.</p>
-            ) : (
-              expiredTickets.map((ticket) => (
-                <TicketCard key={ticket.id} ticket={ticket} expired={true} />
-              ))
-            )}
-          </div>
-        </motion.section>
+              {expiredTickets.length === 0 ? (
+                <p className="empty-ticket-message">No expired tickets.</p>
+              ) : (
+                expiredTickets.map((ticket) => (
+                  <TicketCard key={ticket.id} ticket={ticket} expired={true} />
+                ))
+              )}
+            </div>
+          </motion.section>
+        )}
       </div>
     </motion.div>
   );
