@@ -1,511 +1,15 @@
 .admin-page {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 40px 24px;
-  min-height: 100vh;
-}
-
-.admin-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 32px;
-}
-
-.admin-header h1 {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #1a1a2e;
-}
-
-/* BUTOANE */
-.admin-btn-primary {
-  background: #1a1a2e;
-  color: #fff;
-  border: none;
-  padding: 10px 22px;
-  border-radius: 10px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.admin-btn-primary:hover { background: #2d2d5e; }
-
-.admin-btn-secondary {
-  background: transparent;
-  color: #555;
-  border: 1.5px solid #ddd;
-  padding: 10px 22px;
-  border-radius: 10px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.admin-btn-secondary:hover { border-color: #999; color: #333; }
-
-.admin-btn-edit {
-  background: #f0f4ff;
-  color: #1a1a2e;
-  border: 1.5px solid #c5d0f5;
-  padding: 7px 16px;
-  border-radius: 8px;
-  font-size: 0.88rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.admin-btn-edit:hover { background: #dde4ff; }
-
-.admin-btn-delete {
-  background: #fff0f0;
-  color: #c0392b;
-  border: 1.5px solid #f5c5c5;
-  padding: 7px 16px;
-  border-radius: 8px;
-  font-size: 0.88rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.admin-btn-delete:hover { background: #fdd; }
-
-/* MESAJE */
-.admin-message {
-  padding: 12px 20px;
-  border-radius: 10px;
-  margin-bottom: 24px;
-  font-weight: 500;
-}
-.admin-message.success { background: #e8f5e9; color: #2e7d32; }
-.admin-message.error { background: #fdecea; color: #c62828; }
-
-/* OVERLAY FORM */
-.admin-form-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-
-.admin-form-card {
-  background: #fff;
-  border-radius: 18px;
-  padding: 36px;
-  width: 100%;
-  max-width: 720px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 24px 60px rgba(0,0,0,0.18);
-}
-
-.admin-form-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 28px;
-}
-
-.admin-form-header h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #1a1a2e;
-}
-
-.admin-close-btn {
-  background: none;
-  border: none;
-  font-size: 1.2rem;
-  color: #888;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 6px;
-  transition: background 0.2s;
-}
-.admin-close-btn:hover { background: #f0f0f0; color: #333; }
-
-/* FORM */
-.admin-form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.admin-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.admin-field-full {
-  grid-column: 1 / -1;
-}
-
-.admin-field label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #555;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.admin-field input,
-.admin-field select,
-.admin-field textarea {
-  padding: 10px 14px;
-  border: 1.5px solid #e0e0e0;
-  border-radius: 10px;
-  font-size: 0.95rem;
-  color: #1a1a2e;
-  background: #fafafa;
-  outline: none;
-  transition: border-color 0.2s;
-  font-family: inherit;
-  resize: vertical;
-}
-
-.admin-field input:focus,
-.admin-field select:focus,
-.admin-field textarea:focus {
-  border-color: #1a1a2e;
-  background: #fff;
-}
-
-/* SECTIUNI */
-.admin-section {
-  margin-bottom: 24px;
-}
-
-.admin-section-label {
-  display: block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #555;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 12px;
-}
-
-/* IMAGINI */
-.admin-images-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: flex-start;
-}
-
-.admin-image-preview {
-  position: relative;
-  width: 90px;
-  height: 90px;
-  border-radius: 10px;
-  overflow: hidden;
-  border: 1.5px solid #e0e0e0;
-}
-
-.admin-image-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.admin-remove-img {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  background: rgba(0,0,0,0.6);
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 22px;
-  height: 22px;
-  font-size: 0.7rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.admin-upload-btn {
-  width: 90px;
-  height: 90px;
-  border: 2px dashed #c5c5c5;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #888;
-  cursor: pointer;
-  transition: all 0.2s;
-  padding: 8px;
-}
-.admin-upload-btn:hover { border-color: #1a1a2e; color: #1a1a2e; }
-
-/* CALENDAR */
-.admin-calendar {
-  background: #fafafa;
-  border: 1.5px solid #e8e8e8;
-  border-radius: 14px;
-  padding: 16px;
-  max-width: 360px;
-}
-
-.admin-cal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.admin-cal-header span {
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: #1a1a2e;
-}
-
-.admin-cal-header button {
-  background: none;
-  border: none;
-  font-size: 1.2rem;
-  cursor: pointer;
-  color: #555;
-  padding: 4px 8px;
-  border-radius: 6px;
-  transition: background 0.2s;
-}
-.admin-cal-header button:hover { background: #eee; }
-
-.admin-cal-days-header {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  margin-bottom: 6px;
-}
-
-.admin-cal-days-header span {
-  text-align: center;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #999;
-  padding: 4px 0;
-}
-
-.admin-cal-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 3px;
-}
-
-.admin-cal-day {
-  aspect-ratio: 1;
-  border: none;
-  background: none;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  color: #333;
-  transition: all 0.15s;
-  font-weight: 500;
-}
-
-.admin-cal-day:hover:not(.past) { background: #e8edff; color: #1a1a2e; }
-.admin-cal-day.selected { background: #1a1a2e; color: #fff; font-weight: 700; }
-.admin-cal-day.past { color: #ccc; cursor: default; }
-
-/* DATE TAGS */
-.admin-selected-dates {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.admin-date-tag {
-  background: #e8edff;
-  color: #1a1a2e;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.admin-date-tag button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 0.75rem;
-  color: #666;
-  padding: 0;
-  line-height: 1;
-}
-
-/* FORM ACTIONS */
-.admin-form-actions {
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-  margin-top: 8px;
-  padding-top: 20px;
-  border-top: 1.5px solid #f0f0f0;
-}
-
-/* LISTA */
-.admin-search {
-  margin-bottom: 24px;
-}
-
-.admin-search input {
-  width: 100%;
-  padding: 12px 18px;
-  border: 1.5px solid #e0e0e0;
-  border-radius: 12px;
-  font-size: 0.95rem;
-  background: #fafafa;
-  outline: none;
-  transition: border-color 0.2s;
-  font-family: inherit;
-  box-sizing: border-box;
-}
-
-.admin-search input:focus {
-  border-color: #1a1a2e;
-  background: #fff;
-}
-
-.admin-loading {
-  text-align: center;
-  color: #888;
-  margin-top: 40px;
-}
-
-.admin-attractions-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.admin-attraction-card {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  background: #fff;
-  border: 1.5px solid #ebebeb;
-  border-radius: 14px;
-  padding: 16px 20px;
-  transition: box-shadow 0.2s;
-}
-
-.admin-attraction-card:hover {
-  box-shadow: 0 4px 18px rgba(0,0,0,0.07);
-}
-
-.admin-card-img {
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
-  border-radius: 10px;
-  flex-shrink: 0;
-}
-
-.admin-card-info {
-  flex: 1;
-}
-
-.admin-card-info h3 {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: #1a1a2e;
-  margin-bottom: 4px;
-}
-
-.admin-card-info p {
-  font-size: 0.88rem;
-  color: #666;
-  margin: 2px 0;
-}
-
-.admin-card-dates {
-  color: #888 !important;
-  font-size: 0.82rem !important;
-}
-
-.admin-card-actions {
-  display: flex;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-@media (max-width: 600px) {
-  .admin-form-grid { grid-template-columns: 1fr; }
-  .admin-form-card { padding: 24px 16px; }
-  .admin-attraction-card { flex-wrap: wrap; }
-}
-
-/* MODAL CONFIRMARE STERGERE */
-.admin-confirm-card {
-  background: #fff;
-  border-radius: 18px;
-  padding: 36px;
-  width: 100%;
-  max-width: 420px;
-  box-shadow: 0 24px 60px rgba(0,0,0,0.18);
-  text-align: center;
-}
-
-.admin-confirm-card h2 {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #1a1a2e;
-  margin-bottom: 12px;
-}
-
-.admin-confirm-card p {
-  color: #666;
-  font-size: 0.95rem;
-  margin-bottom: 28px;
-  line-height: 1.5;
-}
-
-.admin-confirm-actions {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-}
-
-.admin-btn-delete-confirm {
-  background: #c0392b;
-  color: #fff;
-  border: none;
-  padding: 10px 24px;
-  border-radius: 10px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.admin-btn-delete-confirm:hover { background: #a93226; }
-
-/* Dashboard layout update */
-.admin-page {
   max-width: 1280px;
+  margin: 0 auto;
   padding: 42px 28px 80px;
+  min-height: 100vh;
   background:
     radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 32%),
     radial-gradient(circle at top right, rgba(15, 23, 42, 0.10), transparent 28%),
     #f8fafc;
 }
+
+/* DASHBOARD HERO */
 
 .admin-hero {
   display: flex;
@@ -561,6 +65,24 @@
   border: 1px solid rgba(255, 255, 255, 0.22);
 }
 
+/* BUTTONS */
+
+.admin-btn-primary {
+  background: #1a1a2e;
+  color: #fff;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.admin-btn-primary:hover {
+  background: #2d2d5e;
+}
+
 .admin-hero-action {
   position: relative;
   z-index: 2;
@@ -572,6 +94,76 @@
 .admin-hero-action:hover {
   background: #f8fafc;
 }
+
+.admin-btn-secondary {
+  background: transparent;
+  color: #555;
+  border: 1.5px solid #ddd;
+  padding: 10px 22px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-btn-secondary:hover {
+  border-color: #999;
+  color: #333;
+}
+
+.admin-btn-edit {
+  background: #f0f4ff;
+  color: #1a1a2e;
+  border: 1.5px solid #c5d0f5;
+  padding: 7px 16px;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-btn-edit:hover {
+  background: #dde4ff;
+}
+
+.admin-btn-delete {
+  background: #fff0f0;
+  color: #c0392b;
+  border: 1.5px solid #f5c5c5;
+  padding: 7px 16px;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-btn-delete:hover {
+  background: #fdd;
+}
+
+/* MESSAGES */
+
+.admin-message {
+  padding: 12px 20px;
+  border-radius: 10px;
+  margin-bottom: 24px;
+  font-weight: 500;
+}
+
+.admin-message.success {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.admin-message.error {
+  background: #fdecea;
+  color: #c62828;
+}
+
+/* STATS */
 
 .admin-stats-grid {
   display: grid;
@@ -611,6 +203,8 @@
   font-size: 14px;
 }
 
+/* MANAGEMENT SECTION */
+
 .admin-management-card {
   padding: 26px;
   border-radius: 26px;
@@ -648,28 +242,50 @@
   font-weight: 700;
 }
 
+/* SEARCH */
+
 .admin-search {
   margin-bottom: 22px;
 }
 
 .admin-search input {
-  background: #f8fafc;
+  width: 100%;
+  padding: 14px 18px;
   border: 1.5px solid rgba(148, 163, 184, 0.26);
   border-radius: 16px;
-  padding: 14px 18px;
+  font-size: 0.95rem;
+  background: #f8fafc;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+  box-sizing: border-box;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .admin-search input:focus {
   border-color: #2563eb;
+  background: #fff;
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
 }
 
+.admin-loading {
+  text-align: center;
+  color: #888;
+  margin-top: 40px;
+}
+
+/* ATTRACTIONS LIST */
+
 .admin-attractions-list {
+  display: flex;
+  flex-direction: column;
   gap: 16px;
 }
 
 .admin-attraction-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
   padding: 18px;
   border-radius: 20px;
   background: #ffffff;
@@ -686,17 +302,26 @@
 .admin-card-img {
   width: 96px;
   height: 96px;
+  object-fit: cover;
   border-radius: 16px;
+  flex-shrink: 0;
+}
+
+.admin-card-info {
+  flex: 1;
 }
 
 .admin-card-info h3 {
   margin: 0 0 6px;
   color: #0f172a;
   font-size: 18px;
+  font-weight: 700;
 }
 
 .admin-card-info p {
   color: #64748b;
+  margin: 2px 0;
+  font-size: 0.9rem;
 }
 
 .admin-card-meta {
@@ -715,10 +340,366 @@
   font-weight: 700;
 }
 
-.admin-btn-edit,
-.admin-btn-delete {
-  border-radius: 999px;
+.admin-card-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
 }
+
+/* FORM OVERLAY */
+
+.admin-form-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.admin-form-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 36px;
+  width: 100%;
+  max-width: 720px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+}
+
+.admin-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.admin-form-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.admin-close-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: #888;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.admin-close-btn:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+/* FORM FIELDS */
+
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.admin-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-field-full {
+  grid-column: 1 / -1;
+}
+
+.admin-field label,
+.admin-section-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.admin-field input,
+.admin-field select,
+.admin-field textarea {
+  padding: 10px 14px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  color: #1a1a2e;
+  background: #fafafa;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.admin-field input:focus,
+.admin-field select:focus,
+.admin-field textarea:focus {
+  border-color: #1a1a2e;
+  background: #fff;
+}
+
+/* FORM SECTIONS */
+
+.admin-section {
+  margin-bottom: 24px;
+}
+
+.admin-section-label {
+  display: block;
+  margin-bottom: 12px;
+}
+
+/* IMAGES */
+
+.admin-images-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.admin-image-preview {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1.5px solid #e0e0e0;
+}
+
+.admin-image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-remove-img {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-upload-btn {
+  width: 90px;
+  height: 90px;
+  border: 2px dashed #c5c5c5;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 8px;
+}
+
+.admin-upload-btn:hover {
+  border-color: #1a1a2e;
+  color: #1a1a2e;
+}
+
+/* CALENDAR */
+
+.admin-calendar {
+  background: #fafafa;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 14px;
+  padding: 16px;
+  max-width: 360px;
+}
+
+.admin-cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.admin-cal-header span {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #1a1a2e;
+}
+
+.admin-cal-header button {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #555;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.admin-cal-header button:hover {
+  background: #eee;
+}
+
+.admin-cal-days-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 6px;
+}
+
+.admin-cal-days-header span {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #999;
+  padding: 4px 0;
+}
+
+.admin-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.admin-cal-day {
+  aspect-ratio: 1;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: #333;
+  transition: all 0.15s;
+  font-weight: 500;
+}
+
+.admin-cal-day:hover:not(.past) {
+  background: #e8edff;
+  color: #1a1a2e;
+}
+
+.admin-cal-day.selected {
+  background: #1a1a2e;
+  color: #fff;
+  font-weight: 700;
+}
+
+.admin-cal-day.past {
+  color: #ccc;
+  cursor: default;
+}
+
+/* DATE TAGS */
+
+.admin-selected-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.admin-date-tag {
+  background: #e8edff;
+  color: #1a1a2e;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-date-tag button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: #666;
+  padding: 0;
+  line-height: 1;
+}
+
+/* FORM ACTIONS */
+
+.admin-form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+  padding-top: 20px;
+  border-top: 1.5px solid #f0f0f0;
+}
+
+/* DELETE CONFIRMATION MODAL */
+
+.admin-confirm-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 36px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+  text-align: center;
+}
+
+.admin-confirm-card h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 12px;
+}
+
+.admin-confirm-card p {
+  color: #666;
+  font-size: 0.95rem;
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+.admin-confirm-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.admin-btn-delete-confirm {
+  background: #c0392b;
+  color: #fff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.admin-btn-delete-confirm:hover {
+  background: #a93226;
+}
+
+/* RESPONSIVE */
 
 @media (max-width: 1000px) {
   .admin-stats-grid {
@@ -743,6 +724,14 @@
   .admin-management-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .admin-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-form-card {
+    padding: 24px 16px;
   }
 
   .admin-attraction-card {

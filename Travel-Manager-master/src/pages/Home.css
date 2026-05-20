@@ -162,20 +162,36 @@
   font-weight: 700;
 }
 
-/* GALLERY */
+/* POPULAR ATTRACTIONS GALLERY */
+
+.gallery-scroll-section {
+  position: relative;
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 58px;
+}
 
 .home-gallery-grid {
   display: flex;
+  justify-content: flex-start;
   gap: 24px;
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 8px 56px 22px;
+  padding: 8px 0 22px;
   scroll-behavior: smooth;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 
+.home-gallery-grid::-webkit-scrollbar {
+  display: none;
+}
+
 .home-gallery-card {
+  min-width: 280px;
+  max-width: 280px;
+  flex: 0 0 280px;
   background: rgba(255, 255, 255, 0.92);
   border-radius: 24px;
   overflow: hidden;
@@ -185,14 +201,20 @@
 }
 
 .gallery-image-wrapper {
-  height: 220px;
+  width: 100%;
+  height: 180px;
   overflow: hidden;
+  border-radius: 18px 18px 0 0;
 }
 
+.gallery-image-wrapper img,
 .home-gallery-card img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.home-gallery-card img {
   transition: transform 0.5s ease;
 }
 
@@ -216,6 +238,41 @@
   color: #2563eb;
   font-size: 14px;
   font-weight: 700;
+}
+
+.gallery-scroll-btn {
+  position: absolute;
+  top: 50%;
+  z-index: 5;
+  width: 46px;
+  height: 46px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.96);
+  color: #0f172a;
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-50%);
+  transition: box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.gallery-scroll-btn:hover {
+  background: #ffffff;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.24);
+}
+
+.gallery-scroll-left {
+  left: 0;
+}
+
+.gallery-scroll-right {
+  right: 0;
 }
 
 /* ABOUT */
@@ -253,196 +310,11 @@
 /* RESPONSIVE */
 
 @media (max-width: 1000px) {
-  .home-gallery-grid,
   .about-grid {
     grid-template-columns: 1fr 1fr;
   }
 }
 
-@media (max-width: 700px) {
-  .home-hero {
-    min-height: 320px;
-    border-radius: 0 0 28px 28px;
-  }
-
-  .home-search-container {
-    margin-top: -26px;
-    padding: 18px;
-  }
-
-  .home-gallery-grid,
-  .about-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .home-gallery-section,
-  .home-info-section {
-    padding: 0 20px;
-    margin-top: 60px;
-  }
-}
-
-/* Galerie orizontala pentru Popular attractions */
-.home-gallery-grid {
-  display: flex;
-  gap: 24px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding: 8px 6px 22px;
-  scroll-behavior: smooth;
-  scrollbar-width: thin;
-}
-
-/* Cardurile au latime fixa ca sa se alinieze pe orizontala */
-.home-gallery-card {
-  min-width: 280px;
-  max-width: 280px;
-  flex: 0 0 280px;
-}
-
-/* Imagine mai constanta in cardurile populare */
-.gallery-image-wrapper {
-  width: 100%;
-  height: 180px;
-  overflow: hidden;
-  border-radius: 18px;
-}
-
-.gallery-image-wrapper img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Pe ecrane mici, cardurile sunt putin mai inguste */
-@media (max-width: 768px) {
-  .home-gallery-card {
-    min-width: 240px;
-    max-width: 240px;
-    flex-basis: 240px;
-  }
-
-  .gallery-image-wrapper {
-    height: 160px;
-  }
-}
-
-/* Sectiune cu scroll orizontal pentru Popular attractions */
-.gallery-scroll-section {
-  position: relative;
-  width: 100%;
-}
-
-/* Sectiune cu scroll orizontal pentru Popular attractions */
-.gallery-scroll-section {
-  position: relative;
-  width: 100%;
-  max-width: 1240px;
-  margin: 0 auto;
-  padding: 0 58px;
-}
-
-/* Galerie orizontala pentru Popular attractions */
-.home-gallery-grid {
-  display: flex;
-  justify-content: flex-start;
-  gap: 24px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding: 8px 0 22px;
-  scroll-behavior: smooth;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-/* Ascundem scrollbar-ul jos si folosim doar sagetile laterale */
-.home-gallery-grid::-webkit-scrollbar {
-  display: none;
-}
-
-/* Carduri cu dimensiune fixa */
-.home-gallery-card {
-  min-width: 280px;
-  max-width: 280px;
-  flex: 0 0 280px;
-  background: rgba(255, 255, 255, 0.92);
-  border-radius: 24px;
-  overflow: hidden;
-  cursor: pointer;
-  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.1);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-}
-
-/* Imagine constanta in cardurile populare */
-.gallery-image-wrapper {
-  width: 100%;
-  height: 180px;
-  overflow: hidden;
-  border-radius: 18px 18px 0 0;
-}
-
-.gallery-image-wrapper img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Continut card */
-.gallery-card-content {
-  padding: 18px 20px 20px;
-}
-
-.gallery-card-content p {
-  padding: 0;
-  margin: 0 0 8px;
-  font-size: 18px;
-  font-weight: 800;
-  color: #0f172a;
-}
-
-.gallery-card-content span {
-  color: #2563eb;
-  font-size: 14px;
-  font-weight: 700;
-}
-
-/* Butoane laterale pentru scroll */
-.gallery-scroll-btn {
-  position: absolute;
-  top: 50%;
-  z-index: 5;
-  width: 46px;
-  height: 46px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.96);
-  color: #0f172a;
-  font-size: 34px;
-  font-weight: 800;
-  line-height: 1;
-  cursor: pointer;
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.18);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transform: translateY(-50%);
-  transition: box-shadow 0.2s ease, background 0.2s ease;
-}
-
-.gallery-scroll-btn:hover {
-  background: #ffffff;
-  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.24);
-}
-
-.gallery-scroll-left {
-  left: 0;
-}
-
-.gallery-scroll-right {
-  right: 0;
-}
-
-/* Pe ecrane mici cardurile sunt mai compacte */
 @media (max-width: 768px) {
   .gallery-scroll-section {
     padding: 0 46px;
@@ -462,5 +334,27 @@
     width: 38px;
     height: 38px;
     font-size: 30px;
+  }
+}
+
+@media (max-width: 700px) {
+  .home-hero {
+    min-height: 320px;
+    border-radius: 0 0 28px 28px;
+  }
+
+  .home-search-container {
+    margin-top: -26px;
+    padding: 18px;
+  }
+
+  .about-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-gallery-section,
+  .home-info-section {
+    padding: 0 20px;
+    margin-top: 60px;
   }
 }
