@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { isLoggedIn, getCurrentUser } from "../services/authService";
 import { API_URL } from "../services/api";
 import "./MyProfile.css";
@@ -12,6 +12,12 @@ function MyProfile() {
 
   const [tickets, setTickets] = useState([]);
   const [barcodes, setBarcodes] = useState({});
+
+  // Cancel ticket states
+  const [cancelTicketId, setCancelTicketId] = useState(null);
+  const [showCancelSuccess, setShowCancelSuccess] = useState(false);
+  const [canceledTicketName, setCanceledTicketName] = useState("");
+  const [canceledTicketPrice, setCanceledTicketPrice] = useState(0);
 
   const [profileMessage, setProfileMessage] = useState({
     text: "",
@@ -38,40 +44,36 @@ function MyProfile() {
 
   const buildImageUrl = (path) => {
     if (!path) return "/placeholder.jpg";
-
-    if (path.startsWith("http")) {
-      return path;
-    }
-
+    if (path.startsWith("http")) return path;
     return `${API_URL}${path.startsWith("/") ? path : `/${path}`}`;
   };
 
-    useEffect(() => {
-      if (!isLoggedIn()) {
-        navigate("/auth");
-        return;
-      }
+  useEffect(() => {
+    if (!isLoggedIn()) {
+      navigate("/auth");
+      return;
+    }
 
-      if (currentUser?.isAdmin) {
-        setTickets([]);
-        return;
-      }
+    if (currentUser?.isAdmin) {
+      setTickets([]);
+      return;
+    }
 
-      const fetchTickets = async () => {
-        const response = await fetch(`${API_URL}/api/Tickets/my-tickets`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
-          }
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setTickets(data);
+    const fetchTickets = async () => {
+      const response = await fetch(`${API_URL}/api/Tickets/my-tickets`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
         }
-      };
+      });
 
-      fetchTickets();
-    }, [navigate, currentUser]);
+      if (response.ok) {
+        const data = await response.json();
+        setTickets(data);
+      }
+    };
+
+    fetchTickets();
+  }, [navigate, currentUser]);
 
   useEffect(() => {
     if (tickets.length === 0) return;
@@ -128,17 +130,10 @@ function MyProfile() {
 
     if (response.ok) {
       const data = await response.json();
-
       localStorage.setItem("user", JSON.stringify(data.user));
       setCurrentUser(data.user);
-
-      setProfileMessage({
-        text: "Changes have been saved.",
-        success: true
-      });
-
+      setProfileMessage({ text: "Changes have been saved.", success: true });
       setIsEditing(false);
-
       setProfileData({
         name: data.user.name || "",
         surname: data.user.surname || "",
@@ -147,7 +142,6 @@ function MyProfile() {
       });
     } else {
       const errorText = await response.text();
-
       setProfileMessage({
         text: errorText.replace(/"/g, "") || "An error occurred. Please try again.",
         success: false
@@ -162,23 +156,8 @@ function MyProfile() {
   const handleChangePassword = async () => {
     setPasswordMessage({ text: "", success: false });
 
-    if (
-      !passwordData.currentPassword ||
-      !passwordData.newPassword ||
-      !passwordData.confirmNewPassword
-    ) {
-      setPasswordMessage({
-        text: "Please complete all password fields.",
-        success: false
-      });
-      return;
-    }
-
     if (passwordData.newPassword !== passwordData.confirmNewPassword) {
-      setPasswordMessage({
-        text: "New passwords do not match.",
-        success: false
-      });
+      setPasswordMessage({ text: "Passwords do not match.", success: false });
       return;
     }
 
@@ -195,31 +174,46 @@ function MyProfile() {
     });
 
     if (response.ok) {
-      const data = await response.json();
-
-      setPasswordMessage({
-        text: data.message,
-        success: true
-      });
-
-      setPasswordData({
-        currentPassword: "",
-        newPassword: "",
-        confirmNewPassword: ""
-      });
+      setPasswordMessage({ text: "Password changed successfully.", success: true });
+      setPasswordData({ currentPassword: "", newPassword: "", confirmNewPassword: "" });
     } else {
       const errorText = await response.text();
-
       setPasswordMessage({
-        text: errorText.replace(/"/g, "") || "An error occurred.",
+        text: errorText.replace(/"/g, "") || "An error occurred. Please try again.",
         success: false
       });
     }
   };
 
+  // Cancel ticket handler
+  const handleCancelTicket = async () => {
+    if (!cancelTicketId) return;
+
+    const ticket = tickets.find((t) => t.id === cancelTicketId);
+
+    try {
+      const response = await fetch(`${API_URL}/api/Tickets/${cancelTicketId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+      });
+
+      if (response.ok) {
+        setCanceledTicketName(ticket?.attractionName || "");
+        setCanceledTicketPrice(ticket?.pricePerTicket || 0);
+        setTickets((prev) => prev.filter((t) => t.id !== cancelTicketId));
+        setCancelTicketId(null);
+        setShowCancelSuccess(true);
+      }
+    } catch (err) {
+      console.error("Error canceling ticket:", err);
+    }
+  };
+
   const TicketCard = ({ ticket, expired }) => (
     <motion.div
-      className={`ticket-card ${expired ? "expired" : ""}`}
+      className={`ticket-card${expired ? " expired" : ""}`}
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
@@ -252,15 +246,28 @@ function MyProfile() {
           <strong>Code:</strong> TKT-{String(ticket.id).padStart(6, "0")}
         </p>
 
-        {barcodes[ticket.id] ? (
-          <img
-            src={barcodes[ticket.id]}
-            alt={`Barcode for ticket ${ticket.id}`}
-            className="ticket-barcode"
-          />
-        ) : (
-          <p className="ticket-barcode-loading">Loading barcode...</p>
-        )}
+        <div className="ticket-barcode-row">
+          {barcodes[ticket.id] ? (
+            <img
+              src={barcodes[ticket.id]}
+              alt={`Barcode for ticket ${ticket.id}`}
+              className="ticket-barcode"
+            />
+          ) : (
+            <p className="ticket-barcode-loading">Loading barcode...</p>
+          )}
+
+          {!expired && (
+            <motion.button
+              className="cancel-ticket-btn"
+              onClick={() => setCancelTicketId(ticket.id)}
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              🗑 Cancel ticket
+            </motion.button>
+          )}
+        </div>
       </div>
     </motion.div>
   );
@@ -316,50 +323,24 @@ function MyProfile() {
           )}
 
           {!isEditing ? (
-            <>
-              <div className="profile-data-list">
-                <div className="profile-data-item">
-                  <div className="profile-data-icon">👤</div>
-                  <div>
-                    <span>Name</span>
-                    <strong>{currentUser?.name || "Unknown"}</strong>
-                  </div>
-                </div>
-
-                <div className="profile-data-item">
-                  <div className="profile-data-icon">🪪</div>
-                  <div>
-                    <span>Surname</span>
-                    <strong>{currentUser?.surname || "Unknown"}</strong>
-                  </div>
-                </div>
-
-                <div className="profile-data-item">
-                  <div className="profile-data-icon">✉️</div>
-                  <div>
-                    <span>Email</span>
-                    <strong>{currentUser?.email || "Unknown"}</strong>
-                  </div>
-                </div>
-              </div>
-
+            <div className="profile-display">
+              <p><strong>Name:</strong> {currentUser?.name} {currentUser?.surname}</p>
+              <p><strong>Email:</strong> {currentUser?.email}</p>
               <motion.button
                 className="edit-btn"
-                onClick={() => {
-                  setIsEditing(true);
-                  setProfileMessage({ text: "", success: false });
-                }}
+                onClick={() => setIsEditing(true)}
                 whileHover={{ y: -2 }}
                 whileTap={{ scale: 0.97 }}
               >
                 Edit profile
               </motion.button>
-            </>
+            </div>
           ) : (
             <div className="profile-form">
               <label>Name</label>
               <input
                 name="name"
+                type="text"
                 value={profileData.name}
                 onChange={handleProfileChange}
               />
@@ -367,6 +348,7 @@ function MyProfile() {
               <label>Surname</label>
               <input
                 name="surname"
+                type="text"
                 value={profileData.surname}
                 onChange={handleProfileChange}
               />
@@ -376,15 +358,6 @@ function MyProfile() {
                 name="email"
                 type="email"
                 value={profileData.email}
-                onChange={handleProfileChange}
-              />
-
-              <label>Confirm with password</label>
-              <input
-                name="password"
-                type="password"
-                placeholder="Enter your current password"
-                value={profileData.password}
                 onChange={handleProfileChange}
               />
 
@@ -398,14 +371,12 @@ function MyProfile() {
                 >
                   Save changes
                 </motion.button>
-
                 <button
                   type="button"
                   className="secondary-action-btn"
                   onClick={() => {
                     setIsEditing(false);
                     setProfileMessage({ text: "", success: false });
-                    setProfileData({ ...profileData, password: "" });
                   }}
                 >
                   Cancel
@@ -420,7 +391,7 @@ function MyProfile() {
           initial={{ opacity: 0, y: 35 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.55, delay: 0.05, ease: "easeOut" }}
+          transition={{ duration: 0.55, ease: "easeOut" }}
         >
           <div className="section-title-row">
             <div>
@@ -489,7 +460,7 @@ function MyProfile() {
           </div>
         </motion.section>
 
-          {!currentUser?.isAdmin && (
+        {!currentUser?.isAdmin && (
           <motion.section
             className="profile-section tickets-section"
             initial={{ opacity: 0, y: 35 }}
@@ -530,6 +501,93 @@ function MyProfile() {
           </motion.section>
         )}
       </div>
+
+      {/* MODAL CONFIRMARE STERGERE BILET */}
+      <AnimatePresence>
+        {cancelTicketId && (
+          <motion.div
+            className="ticket-modal-overlay"
+            onClick={() => setCancelTicketId(null)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="ticket-modal"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, y: 35, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+            >
+              <div className="ticket-modal-icon ticket-modal-icon--warn">🎫</div>
+              <h2>Cancel your ticket?</h2>
+              <p>
+                Are you sure you want to cancel the ticket for{" "}
+                <strong>
+                  {tickets.find((t) => t.id === cancelTicketId)?.attractionName}
+                </strong>
+                ? This action cannot be undone.
+              </p>
+              <div className="ticket-modal-actions">
+                <button
+                  className="secondary-action-btn"
+                  onClick={() => setCancelTicketId(null)}
+                >
+                  No, keep my ticket
+                </button>
+                <motion.button
+                  className="delete-ticket-btn"
+                  onClick={handleCancelTicket}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  Yes, cancel ticket
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* POPUP SUCCES STERGERE BILET */}
+      <AnimatePresence>
+        {showCancelSuccess && (
+          <motion.div
+            className="ticket-modal-overlay"
+            onClick={() => setShowCancelSuccess(false)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="ticket-modal"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, y: 35, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+            >
+              <div className="ticket-modal-icon ticket-modal-icon--success">✓</div>
+              <h2>Ticket cancelled!</h2>
+              <p>
+                Your ticket for <strong>{canceledTicketName}</strong> has been successfully deleted.
+              </p>
+              <p className="ticket-refund-note">
+                💳 The amount of <strong>{canceledTicketPrice} RON</strong> will be refunded to your bank account within 3–5 business days.
+              </p>
+              <motion.button
+                className="primary-action-btn"
+                onClick={() => setShowCancelSuccess(false)}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.97 }}
+              >
+                Got it
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
