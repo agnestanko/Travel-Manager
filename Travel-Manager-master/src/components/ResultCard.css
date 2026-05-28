@@ -6,11 +6,11 @@
 
 .resultsList {
   width: 100%;
-  max-height: 430px;
+  max-height: 800px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   padding-right: 10px;
 }
 
@@ -35,11 +35,11 @@
 
 .resultItem {
   width: 100%;
-  min-height: 190px;
+  min-height: 160px;
   display: flex;
   align-items: center;
-  gap: 22px;
-  padding: 20px 22px;
+  gap: 18px;
+  padding: 14px 18px;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.96);
   border: 1px solid rgba(148, 163, 184, 0.22);
@@ -55,8 +55,8 @@
 }
 
 .resultImage {
-  width: 240px;
-  height: 145px;
+  width: 210px;
+  height: 110px;
   flex-shrink: 0;
   object-fit: cover;
   border-radius: 14px;

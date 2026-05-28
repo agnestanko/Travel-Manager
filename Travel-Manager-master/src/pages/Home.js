@@ -33,7 +33,7 @@ function Home() {
 
     galleryRef.current.scrollBy({
       left: direction === "left" ? -scrollAmount : scrollAmount,
-      behavior: "smooth"
+      behavior: "smooth",
     });
   };
 
@@ -94,8 +94,8 @@ function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.35, duration: 0.7 }}
           >
-            Find attractions, check availability and manage your travel experience
-            in one modern platform.
+            Find attractions, check availability and manage your travel
+            experience in one modern platform.
           </motion.p>
         </motion.div>
       </section>
@@ -140,7 +140,11 @@ function Home() {
               >
                 <div className="gallery-image-wrapper">
                   <img
-                    src={item.firstImage ? buildImageUrl(item.firstImage) : "/placeholder.jpg"}
+                    src={
+                      item.firstImage
+                        ? buildImageUrl(item.firstImage)
+                        : "/placeholder.jpg"
+                    }
                     alt={item.name}
                   />
                 </div>
@@ -177,17 +181,26 @@ function Home() {
         <div className="about-grid">
           <motion.div className="about-card" whileHover={{ y: -8 }}>
             <h3>Discover</h3>
-            <p>Explore attractions and find new places based on your interests.</p>
+            <p>
+              Explore handpicked destinations and turn simple ideas into
+              unforgettable travel plans.
+            </p>
           </motion.div>
 
           <motion.div className="about-card" whileHover={{ y: -8 }}>
             <h3>Book</h3>
-            <p>Select available dates and manage your tickets from your profile.</p>
+            <p>
+              Reserve your spot with ease and manage every ticket directly from
+              your profile.
+            </p>
           </motion.div>
 
           <motion.div className="about-card" whileHover={{ y: -8 }}>
             <h3>Enjoy</h3>
-            <p>Spend less time planning and more time enjoying your trip.</p>
+            <p>
+              Focus on the journey while The Travelers keeps your experience
+              simple and organized.
+            </p>
           </motion.div>
         </div>
       </MotionSection>
