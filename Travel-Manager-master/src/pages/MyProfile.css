@@ -844,3 +844,68 @@
   font-weight: 800;
   margin: 18px 0 0;
 }
+
+.ticket-select-box {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+}
+
+.ticket-card {
+  position: relative;
+}
+
+.ticket-select-box input {
+  cursor: pointer;
+}
+
+.bulk-ticket-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.cancel-selected-tickets-btn {
+  padding: 11px 18px;
+  border: 1.5px solid rgba(220, 38, 38, 0.35);
+  border-radius: 14px;
+  background: rgba(254, 242, 242, 0.85);
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.18s, border-color 0.18s, box-shadow 0.18s;
+}
+
+.cancel-selected-tickets-btn:hover {
+  background: rgba(254, 226, 226, 0.95);
+  border-color: rgba(220, 38, 38, 0.65);
+  box-shadow: 0 6px 18px rgba(220, 38, 38, 0.14);
+}
+
+@media (max-width: 550px) {
+  .bulk-ticket-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .bulk-ticket-actions button,
+  .cancel-selected-tickets-btn {
+    width: 100%;
+  }
+}

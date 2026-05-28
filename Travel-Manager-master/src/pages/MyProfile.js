@@ -14,7 +14,6 @@ function MyProfile() {
 
   const [tickets, setTickets] = useState([]);
   const [ticketPage, setTicketPage] = useState(1);
-  const [totalTicketPages, setTotalTicketPages] = useState(1);
   const [hasMoreTickets, setHasMoreTickets] = useState(true);
   const [loadingTickets, setLoadingTickets] = useState(false);
 
@@ -26,6 +25,12 @@ function MyProfile() {
   const [showCancelSuccess, setShowCancelSuccess] = useState(false);
   const [canceledTicketName, setCanceledTicketName] = useState("");
   const [canceledTicketPrice, setCanceledTicketPrice] = useState(0);
+  const [selectedTicketIds, setSelectedTicketIds] = useState([]);
+
+  const [showBulkCancelConfirm, setShowBulkCancelConfirm] = useState(false);
+  const [showBulkCancelSuccess, setShowBulkCancelSuccess] = useState(false);
+  const [bulkCancelCount, setBulkCancelCount] = useState(0);
+  const [bulkCancelRefund, setBulkCancelRefund] = useState(0);
 
   // Delete account states
   const [deletePassword, setDeletePassword] = useState("");
@@ -37,6 +42,8 @@ function MyProfile() {
   // Calendar state
   const now = new Date();
   const [calendarDate, setCalendarDate] = useState({ year: now.getFullYear(), month: now.getMonth() });
+
+  const [calendarTickets, setCalendarTickets] = useState([]);
 
   const [profileMessage, setProfileMessage] = useState({
     text: "",
@@ -66,6 +73,31 @@ function MyProfile() {
     if (path.startsWith("http")) return path;
     return `${API_URL}${path.startsWith("/") ? path : `/${path}`}`;
   };
+
+  useEffect(() => {
+  if (!isLoggedIn() || currentUser?.isAdmin) {
+    return;
+  }
+
+  const fetchCalendarTickets = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/Tickets/my-ticket-calendar`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCalendarTickets(data);
+      }
+    } catch (err) {
+      console.error("Error loading ticket calendar:", err);
+    }
+  };
+
+  fetchCalendarTickets();
+}, [currentUser]);
 
   useEffect(() => {
     if (!isLoggedIn()) {
@@ -104,7 +136,6 @@ function MyProfile() {
             return [...prev, ...newItems];
           });
 
-          setTotalTicketPages(data.totalPages || 1);
           setHasMoreTickets(ticketPage < (data.totalPages || 1));
         }
       } catch (err) {
@@ -116,8 +147,6 @@ function MyProfile() {
 
     fetchTickets();
   }, [navigate, currentUser, ticketPage]);
-
-  //am sters useeffect ...  if (tickets.length === 0) return;
 
   const today = new Date().toISOString().split("T")[0];
   const activeTickets = tickets.filter((ticket) => ticket.entryDate >= today);
@@ -201,135 +230,257 @@ function MyProfile() {
     }
   };
 
-  // Cancel ticket handler
-  const handleCancelTicket = async () => {
-    if (!cancelTicketId) return;
+    // Cancel single ticket handler
+const handleCancelTicket = async () => {
+  if (!cancelTicketId) return;
 
-    const ticket = tickets.find((t) => t.id === cancelTicketId);
+  const ticket = tickets.find((t) => t.id === cancelTicketId);
 
-    try {
-      const response = await fetch(`${API_URL}/api/Tickets/${cancelTicketId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`
+  try {
+    const response = await fetch(`${API_URL}/api/Tickets/${cancelTicketId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      }
+    });
+
+    if (response.ok) {
+      setCanceledTicketName(ticket?.attractionName || "");
+      setCanceledTicketPrice(ticket?.pricePerTicket || 0);
+
+      setTickets((prev) => prev.filter((t) => t.id !== cancelTicketId));
+
+setCalendarTickets((prev) =>
+  prev
+    .map((item) => {
+      if (
+        item.entryDate !== ticket?.entryDate ||
+        item.attractionName !== ticket?.attractionName
+      ) {
+        return item;
+      }
+
+      return {
+        ...item,
+        totalTickets: Math.max(0, item.totalTickets - 1),
+        activeTickets: Math.max(0, item.activeTickets - 1)
+      };
+    })
+    .filter((item) => item.totalTickets > 0)
+);
+
+setSelectedTicketIds((prev) => prev.filter((id) => id !== cancelTicketId));
+
+      setCancelTicketId(null);
+      setShowCancelSuccess(true);
+    }
+  } catch (err) {
+    console.error("Error canceling ticket:", err);
+  }
+};
+
+// Cancel selected tickets handler
+const handleBulkCancelTickets = async () => {
+  if (selectedTicketIds.length === 0) return;
+
+  try {
+    const response = await fetch(`${API_URL}/api/Tickets/cancel-selected`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      },
+      body: JSON.stringify({
+        ticketIds: selectedTicketIds
+      })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+
+      setBulkCancelCount(data.cancelledTickets || 0);
+      setBulkCancelRefund(data.refundAmount || 0);
+
+      setTickets((prev) =>
+        prev.filter((ticket) => !selectedTicketIds.includes(ticket.id))
+      );
+
+      setCalendarTickets((prev) =>
+  prev
+    .map((item) => {
+      const removedForThisEntry = tickets.filter(
+        (ticket) =>
+          selectedTicketIds.includes(ticket.id) &&
+          ticket.entryDate === item.entryDate &&
+          ticket.attractionName === item.attractionName
+      ).length;
+
+      if (removedForThisEntry === 0) {
+        return item;
+      }
+
+      return {
+        ...item,
+        totalTickets: Math.max(0, item.totalTickets - removedForThisEntry),
+        activeTickets: Math.max(0, item.activeTickets - removedForThisEntry)
+      };
+    })
+    .filter((item) => item.totalTickets > 0)
+);
+
+      setSelectedTicketIds([]);
+      setBarcodes({});
+      setShowBulkCancelConfirm(false);
+      setShowBulkCancelSuccess(true);
+    }
+  } catch (err) {
+    console.error("Error cancelling selected tickets:", err);
+  }
+};
+
+    // Delete account handler
+    const handleDeleteAccount = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/User/delete-account`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+          },
+          body: JSON.stringify({ password: deletePassword })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setDeleteRefundAmount(data.refundAmount || 0);
+          setShowDeleteConfirm(false);
+          setShowDeleteSuccess(true);
+        } else {
+          const errorText = await response.text();
+          setDeletePasswordError(errorText.replace(/"/g, "") || "Incorrect password.");
+          setShowDeleteConfirm(false);
         }
-      });
-
-      if (response.ok) {
-        setCanceledTicketName(ticket?.attractionName || "");
-        setCanceledTicketPrice(ticket?.pricePerTicket || 0);
-        setTickets((prev) => prev.filter((t) => t.id !== cancelTicketId));
-        setCancelTicketId(null);
-        setShowCancelSuccess(true);
+      } catch (err) {
+        console.error("Error deleting account:", err);
       }
-    } catch (err) {
-      console.error("Error canceling ticket:", err);
-    }
-  };
+    };
 
+    const handleDeleteSuccessClose = () => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      navigate("/auth");
+    };
 
-
-  // Delete account handler
-  const handleDeleteAccount = async () => {
-    try {
-      const response = await fetch(`${API_URL}/api/User/delete-account`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`
-        },
-        body: JSON.stringify({ password: deletePassword })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setDeleteRefundAmount(data.refundAmount || 0);
-        setShowDeleteConfirm(false);
-        setShowDeleteSuccess(true);
-      } else {
-        const errorText = await response.text();
-        setDeletePasswordError(errorText.replace(/"/g, "") || "Incorrect password.");
-        setShowDeleteConfirm(false);
-      }
-    } catch (err) {
-      console.error("Error deleting account:", err);
-    }
-  };
-
-  const handleDeleteSuccessClose = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/auth");
-  };
-
-  // Group tickets by date for the calendar
+      // Group ticket calendar summary by entry date
   const ticketsByDate = useMemo(() => {
     const map = {};
-    tickets.forEach((ticket) => {
-      const date = ticket.entryDate;
-      if (!map[date]) map[date] = {};
-      const key = ticket.attractionName;
-      if (!map[date][key]) {
-        map[date][key] = { attractionName: ticket.attractionName, location: ticket.location || "", count: 0 };
+
+    calendarTickets.forEach((item) => {
+      const date = item.entryDate;
+
+      if (!map[date]) {
+        map[date] = [];
       }
-      map[date][key].count += 1;
+
+      map[date].push({
+        attractionName: item.attractionName,
+        location: item.location || "",
+        totalTickets: item.totalTickets,
+        activeTickets: item.activeTickets,
+        expiredTickets: item.expiredTickets
+      });
     });
-    // Convert nested objects to arrays
-    const result = {};
-    Object.keys(map).forEach((date) => {
-      result[date] = Object.values(map[date]);
-    });
-    return result;
-  }, [tickets]);
+
+    return map;
+  }, [calendarTickets]);
 
   const TicketCalendar = () => {
     const [hoveredDay, setHoveredDay] = useState(null);
     const tooltipRef = useRef(null);
     const { year, month } = calendarDate;
 
-    const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-    const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ];
 
-    const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0=Sun
-    // Convert Sunday=0 to Monday=0 offset
+    const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+    const firstDayOfMonth = new Date(year, month, 1).getDay();
     const startOffset = (firstDayOfMonth + 6) % 7;
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-
     const todayStr = new Date().toISOString().split("T")[0];
 
     const goToPrev = () => {
       setCalendarDate(({ year, month }) =>
-        month === 0 ? { year: year - 1, month: 11 } : { year, month: month - 1 }
+        month === 0
+          ? { year: year - 1, month: 11 }
+          : { year, month: month - 1 }
       );
     };
 
     const goToNext = () => {
       setCalendarDate(({ year, month }) =>
-        month === 11 ? { year: year + 1, month: 0 } : { year, month: month + 1 }
+        month === 11
+          ? { year: year + 1, month: 0 }
+          : { year, month: month + 1 }
       );
     };
 
     const cells = [];
-    for (let i = 0; i < startOffset; i++) cells.push(null);
-    for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+
+    for (let i = 0; i < startOffset; i++) {
+      cells.push(null);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      cells.push(day);
+    }
 
     return (
       <div className="ticket-calendar">
         <div className="cal-header">
-          <button className="cal-nav-btn" onClick={goToPrev}>‹</button>
-          <span className="cal-month-label">{monthNames[month]} {year}</span>
-          <button className="cal-nav-btn" onClick={goToNext}>›</button>
+          <button className="cal-nav-btn" onClick={goToPrev}>
+            ‹
+          </button>
+
+          <span className="cal-month-label">
+            {monthNames[month]} {year}
+          </span>
+
+          <button className="cal-nav-btn" onClick={goToNext}>
+            ›
+          </button>
         </div>
 
         <div className="cal-grid">
-          {dayNames.map((d) => (
-            <div key={d} className="cal-day-name">{d}</div>
+          {dayNames.map((dayName) => (
+            <div key={dayName} className="cal-day-name">
+              {dayName}
+            </div>
           ))}
 
-          {cells.map((day, idx) => {
-            if (!day) return <div key={`empty-${idx}`} className="cal-cell cal-cell--empty" />;
+          {cells.map((day, index) => {
+            if (!day) {
+              return (
+                <div
+                  key={`empty-${index}`}
+                  className="cal-cell cal-cell--empty"
+                />
+              );
+            }
 
-            const dateStr = `${year}-${String(month + 1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+            const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
             const hasTickets = !!ticketsByDate[dateStr];
             const isToday = dateStr === todayStr;
 
@@ -345,13 +496,35 @@ function MyProfile() {
                 {hasTickets && hoveredDay === dateStr && (
                   <div className="cal-tooltip" ref={tooltipRef}>
                     <p className="cal-tooltip-date">{dateStr}</p>
+
                     {ticketsByDate[dateStr].map((entry, i) => (
                       <div key={i} className="cal-tooltip-entry">
-                        <span className="cal-tooltip-name">🏛 {entry.attractionName}</span>
+                        <span className="cal-tooltip-name">
+                          🏛 {entry.attractionName}
+                        </span>
+
                         {entry.location && (
-                          <span className="cal-tooltip-location">📍 {entry.location}</span>
+                          <span className="cal-tooltip-location">
+                            📍 {entry.location}
+                          </span>
                         )}
-                        <span className="cal-tooltip-count">🎫 {entry.count} ticket{entry.count > 1 ? "s" : ""}</span>
+
+                        <span className="cal-tooltip-count">
+                          🎫 Total: {entry.totalTickets} ticket
+                          {entry.totalTickets !== 1 ? "s" : ""}
+                        </span>
+
+                        {entry.activeTickets > 0 && (
+                          <span className="cal-tooltip-count">
+                            ✅ Active: {entry.activeTickets}
+                          </span>
+                        )}
+
+                        {entry.expiredTickets > 0 && (
+                          <span className="cal-tooltip-count expired-count">
+                            ⏳ Expired: {entry.expiredTickets}
+                          </span>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -400,6 +573,23 @@ function MyProfile() {
     }
   };
 
+  const toggleTicketSelection = (ticketId) => {
+    setSelectedTicketIds((prev) =>
+      prev.includes(ticketId)
+        ? prev.filter((id) => id !== ticketId)
+        : [...prev, ticketId]
+    );
+  };
+
+  const selectAllLoadedActiveTickets = () => {
+    const loadedActiveTicketIds = activeTickets.map((ticket) => ticket.id);
+    setSelectedTicketIds(loadedActiveTicketIds);
+  };
+
+  const clearSelectedTickets = () => {
+    setSelectedTicketIds([]);
+  };
+
   const TicketCard = ({ ticket, expired }) => (
     <motion.div
       className={`ticket-card${expired ? " expired" : ""}`}
@@ -409,6 +599,18 @@ function MyProfile() {
       transition={{ duration: 0.45, ease: "easeOut" }}
       whileHover={{ y: -6 }}
     >
+
+      {!expired && (
+        <label className="ticket-select-box">
+          <input
+            type="checkbox"
+            checked={selectedTicketIds.includes(ticket.id)}
+            onChange={() => toggleTicketSelection(ticket.id)}
+          />
+          <span>Select</span>
+        </label>
+      )}
+
       {ticket.firstImage && (
         <img
           src={buildImageUrl(ticket.firstImage)}
@@ -710,7 +912,7 @@ function MyProfile() {
         </motion.section>
 
 
-        {!currentUser?.isAdmin && tickets.length > 0 && (
+        {!currentUser?.isAdmin && calendarTickets.length > 0 && (
           <motion.section
             className="profile-section"
             initial={{ opacity: 0, y: 35 }}
@@ -728,66 +930,191 @@ function MyProfile() {
           </motion.section>
         )}
         {!currentUser?.isAdmin && (
-          <motion.section
-            className="profile-section tickets-section"
-            initial={{ opacity: 0, y: 35 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.55, delay: 0.1, ease: "easeOut" }}
+  <motion.section
+    className="profile-section tickets-section"
+    initial={{ opacity: 0, y: 35 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, amount: 0.2 }}
+    transition={{ duration: 0.55, delay: 0.1, ease: "easeOut" }}
+  >
+    <div className="section-title-row">
+      <div>
+        <span className="section-label">Travel wallet</span>
+        <h2>My Tickets</h2>
+      </div>
+
+      {activeTickets.length > 0 && (
+        <div className="bulk-ticket-actions">
+          <button
+            type="button"
+            className="secondary-action-btn"
+            onClick={selectAllLoadedActiveTickets}
           >
-            <div className="section-title-row">
-              <div>
-                <span className="section-label">Travel wallet</span>
-                <h2>My Tickets</h2>
-              </div>
-            </div>
+            Select loaded active
+          </button>
 
-            <div className="ticket-group">
-              <h3>Active tickets</h3>
+          {selectedTicketIds.length > 0 && (
+            <>
+              <button
+                type="button"
+                className="secondary-action-btn"
+                onClick={clearSelectedTickets}
+              >
+                Clear selection
+              </button>
 
-              {activeTickets.length === 0 ? (
-                <p className="empty-ticket-message">No active tickets.</p>
-              ) : (
-                activeTickets.map((ticket) => (
-                  <TicketCard key={ticket.id} ticket={ticket} expired={false} />
-                ))
-              )}
-            </div>
+              <motion.button
+                type="button"
+                className="cancel-selected-tickets-btn"
+                onClick={() => setShowBulkCancelConfirm(true)}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.97 }}
+              >
+                Cancel selected ({selectedTicketIds.length})
+              </motion.button>
+            </>
+          )}
+        </div>
+      )}
+    </div>
 
-            <div className="ticket-group">
-              <h3>Expired tickets</h3>
+    <div className="tickets-scroll-list">
+      <div className="ticket-group">
+        <h3>Active tickets</h3>
 
-              {expiredTickets.length === 0 ? (
-                <p className="empty-ticket-message">No expired tickets.</p>
-              ) : (
-                expiredTickets.map((ticket) => (
-                  <TicketCard key={ticket.id} ticket={ticket} expired={true} />
-                ))
-              )}
-            </div>
-
-            {loadingTickets && (
-                <p className="tickets-loading-message">Loading tickets...</p>
-              )}
-
-              {hasMoreTickets && !loadingTickets && (
-                <button
-                  type="button"
-                  className="load-more-tickets-btn"
-                  onClick={() => setTicketPage((prev) => prev + 1)}
-                >
-                  Load more tickets
-                </button>
-              )}
-
-              {!hasMoreTickets && tickets.length > 0 && (
-                <p className="tickets-end-message">
-                  All tickets are loaded.
-                </p>
-              )}
-          </motion.section>
+        {activeTickets.length === 0 ? (
+          <p className="empty-ticket-message">No active tickets.</p>
+        ) : (
+          activeTickets.map((ticket) => (
+            <TicketCard key={ticket.id} ticket={ticket} expired={false} />
+          ))
         )}
       </div>
+
+      <div className="ticket-group">
+        <h3>Expired tickets</h3>
+
+        {expiredTickets.length === 0 ? (
+          <p className="empty-ticket-message">No expired tickets.</p>
+        ) : (
+          expiredTickets.map((ticket) => (
+            <TicketCard key={ticket.id} ticket={ticket} expired={true} />
+          ))
+        )}
+      </div>
+
+      {loadingTickets && (
+        <p className="tickets-loading-message">Loading tickets...</p>
+      )}
+
+      {hasMoreTickets && !loadingTickets && (
+        <button
+          type="button"
+          className="load-more-tickets-btn"
+          onClick={() => setTicketPage((prev) => prev + 1)}
+        >
+          Load more tickets
+        </button>
+      )}
+
+      {!hasMoreTickets && tickets.length > 0 && (
+        <p className="tickets-end-message">
+          All tickets are loaded.
+        </p>
+      )}
+    </div>
+  </motion.section>
+)}
+      </div>
+
+      <AnimatePresence>
+  {showBulkCancelConfirm && (
+    <motion.div
+      className="ticket-modal-overlay"
+      onClick={() => setShowBulkCancelConfirm(false)}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <motion.div
+        className="ticket-modal"
+        onClick={(e) => e.stopPropagation()}
+        initial={{ opacity: 0, y: 35, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 20, scale: 0.95 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+      >
+        <div className="ticket-modal-icon ticket-modal-icon--warn">🎫</div>
+        <h2>Cancel selected tickets?</h2>
+        <p>
+          You selected <strong>{selectedTicketIds.length}</strong> active ticket
+          {selectedTicketIds.length !== 1 ? "s" : ""}. This action cannot be undone.
+        </p>
+
+        <div className="ticket-modal-actions">
+          <button
+            className="secondary-action-btn"
+            onClick={() => setShowBulkCancelConfirm(false)}
+          >
+            No, keep tickets
+          </button>
+
+          <motion.button
+            className="delete-ticket-btn"
+            onClick={handleBulkCancelTickets}
+            whileHover={{ y: -2 }}
+            whileTap={{ scale: 0.97 }}
+          >
+            Yes, cancel selected
+          </motion.button>
+        </div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
+{/* POPUP SUCCES BULK CANCEL */}
+<AnimatePresence>
+  {showBulkCancelSuccess && (
+    <motion.div
+      className="ticket-modal-overlay"
+      onClick={() => setShowBulkCancelSuccess(false)}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <motion.div
+        className="ticket-modal"
+        onClick={(e) => e.stopPropagation()}
+        initial={{ opacity: 0, y: 35, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 20, scale: 0.95 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+      >
+        <div className="ticket-modal-icon ticket-modal-icon--success">✓</div>
+        <h2>Selected tickets cancelled!</h2>
+        <p>
+          {bulkCancelCount} ticket{bulkCancelCount !== 1 ? "s" : ""} have been cancelled.
+        </p>
+
+        {bulkCancelRefund > 0 && (
+          <p className="ticket-refund-note">
+            💳 A total of <strong>{bulkCancelRefund} RON</strong> will be refunded within 3–5 business days.
+          </p>
+        )}
+
+        <motion.button
+          className="primary-action-btn"
+          onClick={() => setShowBulkCancelSuccess(false)}
+          whileHover={{ y: -2 }}
+          whileTap={{ scale: 0.97 }}
+        >
+          Got it
+        </motion.button>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
 
       {/* MODAL CONFIRMARE STERGERE CONT */}
       <AnimatePresence>

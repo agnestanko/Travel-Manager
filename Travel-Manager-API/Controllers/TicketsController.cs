@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
+
 
 namespace Travel_Manager_API.Controllers
 {
@@ -208,6 +210,130 @@ namespace Travel_Manager_API.Controllers
                 refundAmount = pricePerTicket
             });
         }
+
+        // DELETE: api/Tickets/cancel-selected
+        // Anuleaza mai multe bilete active selectate de utilizator
+        [HttpDelete("cancel-selected")]
+        [Authorize]
+        public async Task<IActionResult> CancelSelectedTickets([FromBody] CancelSelectedTicketsRequest request)
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? User.FindFirstValue("sub");
+
+            if (!int.TryParse(userIdStr, out int userId))
+                return Unauthorized("Invalid token.");
+
+            if (request.TicketIds == null || request.TicketIds.Count == 0)
+                return BadRequest("No tickets selected.");
+
+            var today = DateOnly.FromDateTime(DateTime.Today);
+
+            var tickets = await _context.Tickets
+                .Include(t => t.Booking)
+                    .ThenInclude(b => b.Tickets)
+                .Where(t => request.TicketIds.Contains(t.Id)
+                            && t.Booking.UserId == userId
+                            && t.EntryDate >= today)
+                .ToListAsync();
+
+            if (!tickets.Any())
+                return BadRequest("No valid active tickets selected.");
+
+            int cancelledTickets = 0;
+            int refundAmount = 0;
+
+            var bookings = tickets
+                .GroupBy(t => t.BookingId)
+                .Select(g => g.First().Booking)
+                .ToList();
+
+            foreach (var booking in bookings)
+            {
+                var selectedTicketsForBooking = tickets
+                    .Where(t => t.BookingId == booking.Id)
+                    .ToList();
+
+                if (!selectedTicketsForBooking.Any())
+                    continue;
+
+                int pricePerTicket = booking.TotalPrice / booking.Quantity;
+
+                cancelledTickets += selectedTicketsForBooking.Count;
+                refundAmount += selectedTicketsForBooking.Count * pricePerTicket;
+
+                if (selectedTicketsForBooking.Count == booking.Tickets.Count)
+                {
+                    _context.Bookings.Remove(booking);
+                }
+                else
+                {
+                    _context.Tickets.RemoveRange(selectedTicketsForBooking);
+
+                    booking.Quantity -= selectedTicketsForBooking.Count;
+                    booking.TotalPrice -= selectedTicketsForBooking.Count * pricePerTicket;
+
+                    _context.Bookings.Update(booking);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Selected tickets cancelled successfully.",
+                cancelledTickets,
+                refundAmount
+            });
+        }
+
+        // GET: api/Tickets/my-ticket-calendar
+        // Returneaza un sumar pentru calendar, fara barcode si fara toate detaliile biletelor
+        [HttpGet("my-ticket-calendar")]
+        [Authorize]
+        public async Task<IActionResult> GetMyTicketCalendar()
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? User.FindFirstValue("sub");
+
+            if (!int.TryParse(userIdStr, out int userId))
+                return Unauthorized("Invalid token.");
+
+            var today = DateOnly.FromDateTime(DateTime.Today);
+
+            var tickets = await _context.Tickets
+                .Include(t => t.Booking)
+                .Include(t => t.Attraction)
+                .Where(t => t.Booking.UserId == userId)
+                .Select(t => new
+                {
+                    t.EntryDate,
+                    AttractionName = t.Attraction.Name,
+                    Location = t.Attraction.Location
+                })
+                .ToListAsync();
+
+            var calendarItems = tickets
+                .GroupBy(t => new
+                {
+                    t.EntryDate,
+                    t.AttractionName,
+                    t.Location
+                })
+                .Select(g => new
+                {
+                    EntryDate = g.Key.EntryDate.ToString("yyyy-MM-dd"),
+                    AttractionName = g.Key.AttractionName,
+                    Location = g.Key.Location,
+                    TotalTickets = g.Count(),
+                    ActiveTickets = g.Count(t => t.EntryDate >= today),
+                    ExpiredTickets = g.Count(t => t.EntryDate < today)
+                })
+                .OrderBy(x => x.EntryDate)
+                .ToList();
+
+            return Ok(calendarItems);
+        }
+
     }
 
     public class BuyTicketsRequest
@@ -215,5 +341,10 @@ namespace Travel_Manager_API.Controllers
         public int AttractionId { get; set; }
         public int Quantity { get; set; }
         public string EntryDate { get; set; }
+    }
+
+    public class CancelSelectedTicketsRequest
+    {
+        public List<int> TicketIds { get; set; } = new List<int>();
     }
 }
