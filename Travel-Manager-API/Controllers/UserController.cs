@@ -85,6 +85,49 @@ namespace Travel_Manager_API.Controllers
 
             return Ok(new { message = "Password changed successfully." });
         }
+
+        // DELETE: api/User/delete-account
+        // Șterge contul utilizatorului logat după verificarea parolei
+        [HttpDelete("delete-account")]
+        [Authorize]
+        public async Task<IActionResult> DeleteAccount([FromBody] DeleteAccountRequest request)
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                            ?? User.FindFirstValue("sub");
+            if (!int.TryParse(userIdStr, out int userId))
+                return Unauthorized("Invalid token.");
+
+            var user = await _context.Users
+                .Include(u => u.Bookings)
+                    .ThenInclude(b => b.Tickets)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+                return NotFound("User not found.");
+
+            // Verificăm parola
+            if (!BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
+                return Unauthorized("Incorrect password.");
+
+            // Calculăm suma de rambursat pentru biletele active
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            int refundAmount = user.Bookings
+                .SelectMany(b => b.Tickets)
+                .Where(t => t.EntryDate >= today)
+                .Sum(t => t.Booking.TotalPrice / t.Booking.Quantity);
+
+            // Ștergem utilizatorul — cascade delete se ocupă de:
+            // Bookings → Tickets, Reviews, UserFavoriteAttractions
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Account deleted successfully.",
+                refundAmount
+            });
+        }
+
     }
 
     public class UpdateProfileRequest
@@ -99,5 +142,10 @@ namespace Travel_Manager_API.Controllers
     {
         public string CurrentPassword { get; set; }
         public string NewPassword { get; set; }
+    }
+
+    public class DeleteAccountRequest
+    {
+        public string Password { get; set; }
     }
 }

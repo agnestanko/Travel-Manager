@@ -30,36 +30,21 @@ function AvailabilityCalendar({ availableDates, selectedDate, onSelectDate }) {
     const offset = (firstDay + 6) % 7;
 
     const days = [];
-
-    for (let i = 0; i < offset; i++) {
-      days.push(null);
-    }
-
-    for (let d = 1; d <= daysInMonth; d++) {
-      days.push(d);
-    }
-
+    for (let i = 0; i < offset; i++) days.push(null);
+    for (let d = 1; d <= daysInMonth; d++) days.push(d);
     return days;
   };
 
   const days = buildCalendarDays();
 
   const prevMonth = () => {
-    if (viewMonth === 0) {
-      setViewMonth(11);
-      setViewYear(viewYear - 1);
-    } else {
-      setViewMonth(viewMonth - 1);
-    }
+    if (viewMonth === 0) { setViewMonth(11); setViewYear(viewYear - 1); }
+    else setViewMonth(viewMonth - 1);
   };
 
   const nextMonth = () => {
-    if (viewMonth === 11) {
-      setViewMonth(0);
-      setViewYear(viewYear + 1);
-    } else {
-      setViewMonth(viewMonth + 1);
-    }
+    if (viewMonth === 11) { setViewMonth(0); setViewYear(viewYear + 1); }
+    else setViewMonth(viewMonth + 1);
   };
 
   const formatDate = (day) => {
@@ -95,10 +80,12 @@ function AvailabilityCalendar({ availableDates, selectedDate, onSelectDate }) {
           const dateStr = formatDate(day);
           const isAvailable = availableSet.has(dateStr);
           const isSelected = selectedDate === dateStr;
+          const past = new Date(dateStr) < new Date(today.toISOString().split("T")[0]);
 
           let className = "calendar-day current-month";
           if (isAvailable) className += " available";
           if (isSelected) className += " selected";
+          if (past) className += " past";
 
           return (
             <button
@@ -118,6 +105,30 @@ function AvailabilityCalendar({ availableDates, selectedDate, onSelectDate }) {
 }
 
 // ==============================
+// Star Rating component
+// ==============================
+function StarRating({ value, onChange, readOnly = false, size = "md" }) {
+  const [hovered, setHovered] = useState(0);
+  const display = hovered || value;
+
+  return (
+    <div className={`star-rating star-rating--${size}${readOnly ? " star-rating--readonly" : ""}`}>
+      {[1, 2, 3, 4, 5].map((star) => (
+        <span
+          key={star}
+          className={`star${display >= star ? " star--filled" : ""}`}
+          onClick={() => !readOnly && onChange && onChange(star)}
+          onMouseEnter={() => !readOnly && setHovered(star)}
+          onMouseLeave={() => !readOnly && setHovered(0)}
+        >
+          ★
+        </span>
+      ))}
+    </div>
+  );
+}
+
+// ==============================
 // Pagina principala AttractionDetails
 // ==============================
 function AttractionDetails() {
@@ -132,6 +143,14 @@ function AttractionDetails() {
   const [buyError, setBuyError] = useState("");
   const [images, setImages] = useState([]);
 
+  // Reviews state
+  const [reviews, setReviews] = useState([]);
+  const [canReview, setCanReview] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewMessage, setReviewMessage] = useState({ text: "", success: false });
+  const [submittingReview, setSubmittingReview] = useState(false);
+
   const user = getCurrentUser();
 
   const [formData, setFormData] = useState({
@@ -143,11 +162,7 @@ function AttractionDetails() {
 
   const buildImageUrl = (path) => {
     if (!path) return "/placeholder.jpg";
-
-    if (path.startsWith("http")) {
-      return path;
-    }
-
+    if (path.startsWith("http")) return path;
     return `${API_URL}${path.startsWith("/") ? path : `/${path}`}`;
   };
 
@@ -228,6 +243,27 @@ function AttractionDetails() {
     if (id) fetchDates();
   }, [id]);
 
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const headers = {};
+        const token = localStorage.getItem("token");
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+
+        const response = await fetch(`${API_URL}/api/Reviews/${id}`, { headers });
+        if (response.ok) {
+          const data = await response.json();
+          setReviews(data.reviews ?? data);
+          setCanReview(data.canReview ?? false);
+        }
+      } catch (err) {
+        console.error("Error loading reviews:", err);
+      }
+    };
+
+    if (id) fetchReviews();
+  }, [id]);
+
   if (!attraction) {
     return (
       <div className="details-container">
@@ -295,6 +331,65 @@ function AttractionDetails() {
     }
   };
 
+  const handleSubmitReview = async () => {
+    if (reviewRating === 0) {
+      setReviewMessage({ text: "Please select a rating.", success: false });
+      return;
+    }
+    if (!reviewComment.trim()) {
+      setReviewMessage({ text: "Please write a comment.", success: false });
+      return;
+    }
+
+    setSubmittingReview(true);
+    setReviewMessage({ text: "", success: false });
+
+    try {
+      const response = await fetch(`${API_URL}/api/Reviews/${id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        },
+        body: JSON.stringify({ comment: reviewComment, rating: reviewRating })
+      });
+
+      if (response.ok) {
+        const newReview = await response.json();
+        setReviews((prev) => [newReview, ...prev]);
+        setReviewRating(0);
+        setReviewComment("");
+        setCanReview(false);
+        setReviewMessage({ text: "Review submitted successfully!", success: true });
+      } else {
+        const err = await response.text();
+        setReviewMessage({ text: err.replace(/"/g, "") || "Could not submit review.", success: false });
+      }
+    } catch (err) {
+      setReviewMessage({ text: "An error occurred.", success: false });
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  const handleDeleteReview = async (reviewId) => {
+    try {
+      const response = await fetch(`${API_URL}/api/Reviews/${reviewId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+      });
+      if (response.ok) {
+        setReviews((prev) => prev.filter((r) => r.id !== reviewId));
+      }
+    } catch (err) {
+      console.error("Error deleting review:", err);
+    }
+  };
+
+  const avgRating = reviews.length
+    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+    : null;
+
   return (
     <motion.div
       className="details-container"
@@ -356,7 +451,7 @@ function AttractionDetails() {
               <strong>{price} RON</strong>
             </div>
 
-                        {user?.isAdmin ? (
+            {user?.isAdmin ? (
               <motion.button
                 className="admin-manage-attraction-btn"
                 onClick={() => navigate("/admin", { state: { editAttractionId: Number(id) } })}
@@ -378,6 +473,113 @@ function AttractionDetails() {
           </motion.div>
         </motion.div>
 
+        {/* ====== REVIEWS SECTION ====== */}
+        <motion.section
+          className="reviews-section"
+          initial={{ opacity: 0, y: 35 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.1 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          <div className="reviews-header">
+            <div>
+              <span className="reviews-kicker">What people say</span>
+              <h3>Reviews</h3>
+            </div>
+            {avgRating && (
+              <div className="reviews-avg">
+                <span className="reviews-avg-score">{avgRating}</span>
+                <StarRating value={Math.round(avgRating)} readOnly size="sm" />
+                <span className="reviews-count">{reviews.length} review{reviews.length !== 1 ? "s" : ""}</span>
+              </div>
+            )}
+          </div>
+
+          {isLoggedIn() && !user?.isAdmin && canReview && (
+            <motion.div
+              className="review-form"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              <p className="review-form-label">Leave your review</p>
+              <StarRating value={reviewRating} onChange={setReviewRating} size="lg" />
+              <textarea
+                className="review-textarea"
+                placeholder="Share your experience..."
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+                rows={3}
+              />
+              {reviewMessage.text && (
+                <p className={reviewMessage.success ? "review-msg-success" : "review-msg-error"}>
+                  {reviewMessage.text}
+                </p>
+              )}
+              <motion.button
+                className="review-submit-btn"
+                onClick={handleSubmitReview}
+                disabled={submittingReview}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.97 }}
+              >
+                {submittingReview ? "Submitting..." : "Submit review"}
+              </motion.button>
+            </motion.div>
+          )}
+
+          {isLoggedIn() && !user?.isAdmin && !canReview && (
+            <p className="review-already-done">
+              {reviews.some(r => r.userId === user?.id)
+                ? "✓ You have already reviewed this attraction."
+                : "You can only review attractions you have visited."}
+            </p>
+          )}
+
+          {reviews.length === 0 ? (
+            <p className="reviews-empty">No reviews yet. Be the first to share your experience!</p>
+          ) : (
+            <div className="reviews-list">
+              {reviews.map((review, index) => (
+                <motion.div
+                  key={review.id}
+                  className="review-card"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: index * 0.06 }}
+                >
+                  <div className="review-card-header">
+                    <div className="review-card-left">
+                      <div className="review-avatar">
+                        {review.userName?.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="review-author">{review.userName}</p>
+                        <p className="review-date">{review.dateOfReview}</p>
+                      </div>
+                    </div>
+                    <div className="review-card-right">
+                      <StarRating value={review.rating} readOnly size="sm" />
+                      {(user?.id === review.userId || user?.isAdmin) && (
+                        <button
+                          className="review-delete-btn"
+                          onClick={() => handleDeleteReview(review.id)}
+                          title="Delete review"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <p className="review-comment">{review.comment}</p>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </motion.section>
+
+        {/* ====== RELATED ATTRACTIONS ====== */}
         <motion.aside
           className="related-sidebar"
           initial={{ opacity: 0, y: 35 }}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { isLoggedIn, getCurrentUser } from "../services/authService";
@@ -18,6 +18,17 @@ function MyProfile() {
   const [showCancelSuccess, setShowCancelSuccess] = useState(false);
   const [canceledTicketName, setCanceledTicketName] = useState("");
   const [canceledTicketPrice, setCanceledTicketPrice] = useState(0);
+
+  // Delete account states
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deletePasswordError, setDeletePasswordError] = useState("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
+  const [deleteRefundAmount, setDeleteRefundAmount] = useState(0);
+
+  // Calendar state
+  const now = new Date();
+  const [calendarDate, setCalendarDate] = useState({ year: now.getFullYear(), month: now.getMonth() });
 
   const [profileMessage, setProfileMessage] = useState({
     text: "",
@@ -209,6 +220,141 @@ function MyProfile() {
     } catch (err) {
       console.error("Error canceling ticket:", err);
     }
+  };
+
+  // Delete account handler
+  const handleDeleteAccount = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/User/delete-account`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        },
+        body: JSON.stringify({ password: deletePassword })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setDeleteRefundAmount(data.refundAmount || 0);
+        setShowDeleteConfirm(false);
+        setShowDeleteSuccess(true);
+      } else {
+        const errorText = await response.text();
+        setDeletePasswordError(errorText.replace(/"/g, "") || "Incorrect password.");
+        setShowDeleteConfirm(false);
+      }
+    } catch (err) {
+      console.error("Error deleting account:", err);
+    }
+  };
+
+  const handleDeleteSuccessClose = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/auth");
+  };
+
+  // Group tickets by date for the calendar
+  const ticketsByDate = useMemo(() => {
+    const map = {};
+    tickets.forEach((ticket) => {
+      const date = ticket.entryDate;
+      if (!map[date]) map[date] = {};
+      const key = ticket.attractionName;
+      if (!map[date][key]) {
+        map[date][key] = { attractionName: ticket.attractionName, location: ticket.location || "", count: 0 };
+      }
+      map[date][key].count += 1;
+    });
+    // Convert nested objects to arrays
+    const result = {};
+    Object.keys(map).forEach((date) => {
+      result[date] = Object.values(map[date]);
+    });
+    return result;
+  }, [tickets]);
+
+  const TicketCalendar = () => {
+    const [hoveredDay, setHoveredDay] = useState(null);
+    const tooltipRef = useRef(null);
+    const { year, month } = calendarDate;
+
+    const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+
+    const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0=Sun
+    // Convert Sunday=0 to Monday=0 offset
+    const startOffset = (firstDayOfMonth + 6) % 7;
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const todayStr = new Date().toISOString().split("T")[0];
+
+    const goToPrev = () => {
+      setCalendarDate(({ year, month }) =>
+        month === 0 ? { year: year - 1, month: 11 } : { year, month: month - 1 }
+      );
+    };
+
+    const goToNext = () => {
+      setCalendarDate(({ year, month }) =>
+        month === 11 ? { year: year + 1, month: 0 } : { year, month: month + 1 }
+      );
+    };
+
+    const cells = [];
+    for (let i = 0; i < startOffset; i++) cells.push(null);
+    for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+
+    return (
+      <div className="ticket-calendar">
+        <div className="cal-header">
+          <button className="cal-nav-btn" onClick={goToPrev}>‹</button>
+          <span className="cal-month-label">{monthNames[month]} {year}</span>
+          <button className="cal-nav-btn" onClick={goToNext}>›</button>
+        </div>
+
+        <div className="cal-grid">
+          {dayNames.map((d) => (
+            <div key={d} className="cal-day-name">{d}</div>
+          ))}
+
+          {cells.map((day, idx) => {
+            if (!day) return <div key={`empty-${idx}`} className="cal-cell cal-cell--empty" />;
+
+            const dateStr = `${year}-${String(month + 1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+            const hasTickets = !!ticketsByDate[dateStr];
+            const isToday = dateStr === todayStr;
+
+            return (
+              <div
+                key={dateStr}
+                className={`cal-cell${hasTickets ? " cal-cell--has-tickets" : ""}${isToday ? " cal-cell--today" : ""}`}
+                onMouseEnter={() => hasTickets && setHoveredDay(dateStr)}
+                onMouseLeave={() => setHoveredDay(null)}
+              >
+                <span className="cal-day-num">{day}</span>
+
+                {hasTickets && hoveredDay === dateStr && (
+                  <div className="cal-tooltip" ref={tooltipRef}>
+                    <p className="cal-tooltip-date">{dateStr}</p>
+                    {ticketsByDate[dateStr].map((entry, i) => (
+                      <div key={i} className="cal-tooltip-entry">
+                        <span className="cal-tooltip-name">🏛 {entry.attractionName}</span>
+                        {entry.location && (
+                          <span className="cal-tooltip-location">📍 {entry.location}</span>
+                        )}
+                        <span className="cal-tooltip-count">🎫 {entry.count} ticket{entry.count > 1 ? "s" : ""}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
   };
 
   const TicketCard = ({ ticket, expired }) => (
@@ -460,6 +606,77 @@ function MyProfile() {
           </div>
         </motion.section>
 
+        <motion.section
+          className="profile-section delete-account-section"
+          initial={{ opacity: 0, y: 35 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.55, ease: "easeOut" }}
+        >
+          <div className="section-title-row">
+            <div>
+              <h2>Delete account</h2>
+            </div>
+          </div>
+
+          <p className="delete-account-warning">
+            This action is <strong>permanent and irreversible</strong>. All your data, bookings and tickets will be deleted. Active tickets will be refunded to your bank account.
+          </p>
+
+          <div className="profile-form">
+            <label>Enter your current password to confirm</label>
+            <input
+              type="password"
+              value={deletePassword}
+              onChange={(e) => {
+                setDeletePassword(e.target.value);
+                setDeletePasswordError("");
+              }}
+              placeholder="Your current password"
+            />
+
+            {deletePasswordError && (
+              <p className="profile-msg-error">{deletePasswordError}</p>
+            )}
+
+            <div className="profile-actions">
+              <motion.button
+                type="button"
+                className="delete-account-btn"
+                onClick={() => {
+                  if (!deletePassword) {
+                    setDeletePasswordError("Please enter your password.");
+                    return;
+                  }
+                  setShowDeleteConfirm(true);
+                }}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.97 }}
+              >
+                Delete my account
+              </motion.button>
+            </div>
+          </div>
+        </motion.section>
+
+
+        {!currentUser?.isAdmin && tickets.length > 0 && (
+          <motion.section
+            className="profile-section"
+            initial={{ opacity: 0, y: 35 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.55, ease: "easeOut" }}
+          >
+            <div className="section-title-row">
+              <div>
+                <span className="section-label">Overview</span>
+                <h2>My Travel Calendar</h2>
+              </div>
+            </div>
+            <TicketCalendar />
+          </motion.section>
+        )}
         {!currentUser?.isAdmin && (
           <motion.section
             className="profile-section tickets-section"
@@ -501,6 +718,87 @@ function MyProfile() {
           </motion.section>
         )}
       </div>
+
+      {/* MODAL CONFIRMARE STERGERE CONT */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <motion.div
+            className="ticket-modal-overlay"
+            onClick={() => setShowDeleteConfirm(false)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="ticket-modal"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, y: 35, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+            >
+              <div className="ticket-modal-icon ticket-modal-icon--danger">⚠️</div>
+              <h2>Delete your account?</h2>
+              <p>
+                Are you absolutely sure? This will permanently delete your account, all your bookings and tickets. <strong>This cannot be undone.</strong>
+              </p>
+              <div className="ticket-modal-actions">
+                <button
+                  className="secondary-action-btn"
+                  onClick={() => setShowDeleteConfirm(false)}
+                >
+                  No, keep my account
+                </button>
+                <motion.button
+                  className="delete-ticket-btn"
+                  onClick={handleDeleteAccount}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  Yes, delete account
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* POPUP SUCCES STERGERE CONT */}
+      <AnimatePresence>
+        {showDeleteSuccess && (
+          <motion.div
+            className="ticket-modal-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="ticket-modal"
+              initial={{ opacity: 0, y: 35, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+            >
+              <div className="ticket-modal-icon ticket-modal-icon--success">✓</div>
+              <h2>Account deleted</h2>
+              <p>Your account and all associated data have been permanently deleted.</p>
+              {deleteRefundAmount > 0 && (
+                <p className="ticket-refund-note">
+                  💳 A total of <strong>{deleteRefundAmount} RON</strong> will be refunded to your bank account within 3–5 business days for your active tickets.
+                </p>
+              )}
+              <motion.button
+                className="primary-action-btn"
+                onClick={handleDeleteSuccessClose}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.97 }}
+              >
+                OK
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* MODAL CONFIRMARE STERGERE BILET */}
       <AnimatePresence>

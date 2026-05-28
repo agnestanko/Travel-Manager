@@ -94,6 +94,7 @@ namespace Travel_Manager_API.Controllers
                 {
                     t.Id,
                     AttractionName = t.Attraction.Name,
+                    Location = t.Attraction.Location,
                     EntryDate = t.EntryDate.ToString("yyyy-MM-dd"),
                     DateOfPurchase = t.Booking.DateOfPurchase.ToString("yyyy-MM-dd"),
                     PricePerTicket = t.Booking.TotalPrice / t.Booking.Quantity,
@@ -130,9 +131,6 @@ namespace Travel_Manager_API.Controllers
             return File(barcodeBytes, "image/png");
         }
 
-        // Adaugă acest endpoint în TicketsController.cs
-        // (în clasa TicketsController, după metoda GetMyTickets)
-
         // DELETE: api/Tickets/{id}
         // Anulează un bilet activ al utilizatorului logat
         [HttpDelete("{id}")]
@@ -144,26 +142,42 @@ namespace Travel_Manager_API.Controllers
             if (!int.TryParse(userIdStr, out int userId))
                 return Unauthorized("Invalid token.");
 
-            // Gasim biletul împreună cu booking-ul asociat
             var ticket = await _context.Tickets
                 .Include(t => t.Booking)
+                    .ThenInclude(b => b.Tickets)
                 .FirstOrDefaultAsync(t => t.Id == id);
 
             if (ticket == null)
                 return NotFound("Ticket not found.");
 
-            // Verificam ca biletul apartine utilizatorului logat
             if (ticket.Booking.UserId != userId)
                 return Forbid();
 
-            // Nu permitem anularea biletelor expirate (data de intrare a trecut)
             if (ticket.EntryDate < DateOnly.FromDateTime(DateTime.Today))
                 return BadRequest("Cannot cancel expired tickets.");
 
-            _context.Tickets.Remove(ticket);
+            var booking = ticket.Booking;
+            int pricePerTicket = booking.TotalPrice / booking.Quantity;
+
+            if (booking.Tickets.Count <= 1)
+            {
+                _context.Bookings.Remove(booking);
+            }
+            else
+            {
+                _context.Tickets.Remove(ticket);
+                booking.Quantity -= 1;
+                booking.TotalPrice -= pricePerTicket;
+                _context.Bookings.Update(booking);
+            }
+
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Ticket cancelled successfully. Refund will be processed in 3-5 business days." });
+            return Ok(new
+            {
+                message = "Ticket cancelled successfully. Refund will be processed in 3-5 business days.",
+                refundAmount = pricePerTicket
+            });
         }
     }
 
