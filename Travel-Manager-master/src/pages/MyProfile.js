@@ -41,31 +41,34 @@ function MyProfile() {
 
   // Calendar state
   const now = new Date();
-  const [calendarDate, setCalendarDate] = useState({ year: now.getFullYear(), month: now.getMonth() });
+  const [calendarDate, setCalendarDate] = useState({
+    year: now.getFullYear(),
+    month: now.getMonth(),
+  });
 
   const [calendarTickets, setCalendarTickets] = useState([]);
 
   const [profileMessage, setProfileMessage] = useState({
     text: "",
-    success: false
+    success: false,
   });
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
-    confirmNewPassword: ""
+    confirmNewPassword: "",
   });
 
   const [passwordMessage, setPasswordMessage] = useState({
     text: "",
-    success: false
+    success: false,
   });
 
   const [profileData, setProfileData] = useState({
     name: currentUser?.name || "",
     surname: currentUser?.surname || "",
     email: currentUser?.email || "",
-    password: ""
+    password: "",
   });
 
   const buildImageUrl = (path) => {
@@ -75,29 +78,32 @@ function MyProfile() {
   };
 
   useEffect(() => {
-  if (!isLoggedIn() || currentUser?.isAdmin) {
-    return;
-  }
-
-  const fetchCalendarTickets = async () => {
-    try {
-      const response = await fetch(`${API_URL}/api/Tickets/my-ticket-calendar`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setCalendarTickets(data);
-      }
-    } catch (err) {
-      console.error("Error loading ticket calendar:", err);
+    if (!isLoggedIn() || currentUser?.isAdmin) {
+      return;
     }
-  };
 
-  fetchCalendarTickets();
-}, [currentUser]);
+    const fetchCalendarTickets = async () => {
+      try {
+        const response = await fetch(
+          `${API_URL}/api/Tickets/my-ticket-calendar`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          },
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setCalendarTickets(data);
+        }
+      } catch (err) {
+        console.error("Error loading ticket calendar:", err);
+      }
+    };
+
+    fetchCalendarTickets();
+  }, [currentUser]);
 
   useEffect(() => {
     if (!isLoggedIn()) {
@@ -119,9 +125,9 @@ function MyProfile() {
           `${API_URL}/api/Tickets/my-tickets?page=${ticketPage}&pageSize=${TICKETS_PAGE_SIZE}`,
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`
-            }
-          }
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          },
         );
 
         if (response.ok) {
@@ -130,7 +136,7 @@ function MyProfile() {
           setTickets((prev) => {
             const existingIds = new Set(prev.map((ticket) => ticket.id));
             const newItems = (data.items || []).filter(
-              (ticket) => !existingIds.has(ticket.id)
+              (ticket) => !existingIds.has(ticket.id),
             );
 
             return [...prev, ...newItems];
@@ -163,14 +169,14 @@ function MyProfile() {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       body: JSON.stringify({
         name: profileData.name,
         surname: profileData.surname,
         email: profileData.email,
-        password: profileData.password
-      })
+        password: profileData.password,
+      }),
     });
 
     if (response.ok) {
@@ -183,13 +189,14 @@ function MyProfile() {
         name: data.user.name || "",
         surname: data.user.surname || "",
         email: data.user.email || "",
-        password: ""
+        password: "",
       });
     } else {
       const errorText = await response.text();
       setProfileMessage({
-        text: errorText.replace(/"/g, "") || "An error occurred. Please try again.",
-        success: false
+        text:
+          errorText.replace(/"/g, "") || "An error occurred. Please try again.",
+        success: false,
       });
     }
   };
@@ -210,168 +217,186 @@ function MyProfile() {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       body: JSON.stringify({
         currentPassword: passwordData.currentPassword,
-        newPassword: passwordData.newPassword
-      })
+        newPassword: passwordData.newPassword,
+      }),
     });
 
     if (response.ok) {
-      setPasswordMessage({ text: "Password changed successfully.", success: true });
-      setPasswordData({ currentPassword: "", newPassword: "", confirmNewPassword: "" });
+      setPasswordMessage({
+        text: "Password changed successfully.",
+        success: true,
+      });
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmNewPassword: "",
+      });
     } else {
       const errorText = await response.text();
       setPasswordMessage({
-        text: errorText.replace(/"/g, "") || "An error occurred. Please try again.",
-        success: false
+        text:
+          errorText.replace(/"/g, "") || "An error occurred. Please try again.",
+        success: false,
       });
     }
   };
 
-    // Cancel single ticket handler
-const handleCancelTicket = async () => {
-  if (!cancelTicketId) return;
+  // Cancel single ticket handler
+  const handleCancelTicket = async () => {
+    if (!cancelTicketId) return;
 
-  const ticket = tickets.find((t) => t.id === cancelTicketId);
+    const ticket = tickets.find((t) => t.id === cancelTicketId);
 
-  try {
-    const response = await fetch(`${API_URL}/api/Tickets/${cancelTicketId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`
+    try {
+      const response = await fetch(`${API_URL}/api/Tickets/${cancelTicketId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (response.ok) {
+        setCanceledTicketName(ticket?.attractionName || "");
+        setCanceledTicketPrice(ticket?.pricePerTicket || 0);
+
+        setTickets((prev) => prev.filter((t) => t.id !== cancelTicketId));
+
+        setCalendarTickets((prev) =>
+          prev
+            .map((item) => {
+              if (
+                item.entryDate !== ticket?.entryDate ||
+                item.attractionName !== ticket?.attractionName
+              ) {
+                return item;
+              }
+
+              return {
+                ...item,
+                totalTickets: Math.max(0, item.totalTickets - 1),
+                activeTickets: Math.max(0, item.activeTickets - 1),
+              };
+            })
+            .filter((item) => item.totalTickets > 0),
+        );
+
+        setSelectedTicketIds((prev) =>
+          prev.filter((id) => id !== cancelTicketId),
+        );
+
+        setCancelTicketId(null);
+        setShowCancelSuccess(true);
       }
-    });
-
-    if (response.ok) {
-      setCanceledTicketName(ticket?.attractionName || "");
-      setCanceledTicketPrice(ticket?.pricePerTicket || 0);
-
-      setTickets((prev) => prev.filter((t) => t.id !== cancelTicketId));
-
-setCalendarTickets((prev) =>
-  prev
-    .map((item) => {
-      if (
-        item.entryDate !== ticket?.entryDate ||
-        item.attractionName !== ticket?.attractionName
-      ) {
-        return item;
-      }
-
-      return {
-        ...item,
-        totalTickets: Math.max(0, item.totalTickets - 1),
-        activeTickets: Math.max(0, item.activeTickets - 1)
-      };
-    })
-    .filter((item) => item.totalTickets > 0)
-);
-
-setSelectedTicketIds((prev) => prev.filter((id) => id !== cancelTicketId));
-
-      setCancelTicketId(null);
-      setShowCancelSuccess(true);
+    } catch (err) {
+      console.error("Error canceling ticket:", err);
     }
-  } catch (err) {
-    console.error("Error canceling ticket:", err);
-  }
-};
+  };
 
-// Cancel selected tickets handler
-const handleBulkCancelTickets = async () => {
-  if (selectedTicketIds.length === 0) return;
+  // Cancel selected tickets handler
+  const handleBulkCancelTickets = async () => {
+    if (selectedTicketIds.length === 0) return;
 
-  try {
-    const response = await fetch(`${API_URL}/api/Tickets/cancel-selected`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`
-      },
-      body: JSON.stringify({
-        ticketIds: selectedTicketIds
-      })
-    });
+    try {
+      const response = await fetch(`${API_URL}/api/Tickets/cancel-selected`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          ticketIds: selectedTicketIds,
+        }),
+      });
 
-    if (response.ok) {
-      const data = await response.json();
+      if (response.ok) {
+        const data = await response.json();
 
-      setBulkCancelCount(data.cancelledTickets || 0);
-      setBulkCancelRefund(data.refundAmount || 0);
+        setBulkCancelCount(data.cancelledTickets || 0);
+        setBulkCancelRefund(data.refundAmount || 0);
 
-      setTickets((prev) =>
-        prev.filter((ticket) => !selectedTicketIds.includes(ticket.id))
-      );
+        setTickets((prev) =>
+          prev.filter((ticket) => !selectedTicketIds.includes(ticket.id)),
+        );
 
-      setCalendarTickets((prev) =>
-  prev
-    .map((item) => {
-      const removedForThisEntry = tickets.filter(
-        (ticket) =>
-          selectedTicketIds.includes(ticket.id) &&
-          ticket.entryDate === item.entryDate &&
-          ticket.attractionName === item.attractionName
-      ).length;
+        setCalendarTickets((prev) =>
+          prev
+            .map((item) => {
+              const removedForThisEntry = tickets.filter(
+                (ticket) =>
+                  selectedTicketIds.includes(ticket.id) &&
+                  ticket.entryDate === item.entryDate &&
+                  ticket.attractionName === item.attractionName,
+              ).length;
 
-      if (removedForThisEntry === 0) {
-        return item;
+              if (removedForThisEntry === 0) {
+                return item;
+              }
+
+              return {
+                ...item,
+                totalTickets: Math.max(
+                  0,
+                  item.totalTickets - removedForThisEntry,
+                ),
+                activeTickets: Math.max(
+                  0,
+                  item.activeTickets - removedForThisEntry,
+                ),
+              };
+            })
+            .filter((item) => item.totalTickets > 0),
+        );
+
+        setSelectedTicketIds([]);
+        setBarcodes({});
+        setShowBulkCancelConfirm(false);
+        setShowBulkCancelSuccess(true);
       }
-
-      return {
-        ...item,
-        totalTickets: Math.max(0, item.totalTickets - removedForThisEntry),
-        activeTickets: Math.max(0, item.activeTickets - removedForThisEntry)
-      };
-    })
-    .filter((item) => item.totalTickets > 0)
-);
-
-      setSelectedTicketIds([]);
-      setBarcodes({});
-      setShowBulkCancelConfirm(false);
-      setShowBulkCancelSuccess(true);
+    } catch (err) {
+      console.error("Error cancelling selected tickets:", err);
     }
-  } catch (err) {
-    console.error("Error cancelling selected tickets:", err);
-  }
-};
+  };
 
-    // Delete account handler
-    const handleDeleteAccount = async () => {
-      try {
-        const response = await fetch(`${API_URL}/api/User/delete-account`, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`
-          },
-          body: JSON.stringify({ password: deletePassword })
-        });
+  // Delete account handler
+  const handleDeleteAccount = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/User/delete-account`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ password: deletePassword }),
+      });
 
-        if (response.ok) {
-          const data = await response.json();
-          setDeleteRefundAmount(data.refundAmount || 0);
-          setShowDeleteConfirm(false);
-          setShowDeleteSuccess(true);
-        } else {
-          const errorText = await response.text();
-          setDeletePasswordError(errorText.replace(/"/g, "") || "Incorrect password.");
-          setShowDeleteConfirm(false);
-        }
-      } catch (err) {
-        console.error("Error deleting account:", err);
+      if (response.ok) {
+        const data = await response.json();
+        setDeleteRefundAmount(data.refundAmount || 0);
+        setShowDeleteConfirm(false);
+        setShowDeleteSuccess(true);
+      } else {
+        const errorText = await response.text();
+        setDeletePasswordError(
+          errorText.replace(/"/g, "") || "Incorrect password.",
+        );
+        setShowDeleteConfirm(false);
       }
-    };
+    } catch (err) {
+      console.error("Error deleting account:", err);
+    }
+  };
 
-    const handleDeleteSuccessClose = () => {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      navigate("/auth");
-    };
+  const handleDeleteSuccessClose = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/auth");
+  };
 
-      // Group ticket calendar summary by entry date
+  // Group ticket calendar summary by entry date
   const ticketsByDate = useMemo(() => {
     const map = {};
 
@@ -387,16 +412,29 @@ const handleBulkCancelTickets = async () => {
         location: item.location || "",
         totalTickets: item.totalTickets,
         activeTickets: item.activeTickets,
-        expiredTickets: item.expiredTickets
+        expiredTickets: item.expiredTickets,
       });
     });
 
     return map;
   }, [calendarTickets]);
 
+  const calendarSummary = useMemo(() => {
+    let total = 0;
+    let active = 0;
+    let expired = 0;
+
+    calendarTickets.forEach((item) => {
+      total += item.totalTickets || 0;
+      active += item.activeTickets || 0;
+      expired += item.expiredTickets || 0;
+    });
+
+    return { total, active, expired };
+  }, [calendarTickets]);
+
   const TicketCalendar = () => {
     const [hoveredDay, setHoveredDay] = useState(null);
-    const tooltipRef = useRef(null);
     const { year, month } = calendarDate;
 
     const monthNames = [
@@ -411,7 +449,7 @@ const handleBulkCancelTickets = async () => {
       "September",
       "October",
       "November",
-      "December"
+      "December",
     ];
 
     const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -425,7 +463,7 @@ const handleBulkCancelTickets = async () => {
       setCalendarDate(({ year, month }) =>
         month === 0
           ? { year: year - 1, month: 11 }
-          : { year, month: month - 1 }
+          : { year, month: month - 1 },
       );
     };
 
@@ -433,7 +471,7 @@ const handleBulkCancelTickets = async () => {
       setCalendarDate(({ year, month }) =>
         month === 11
           ? { year: year + 1, month: 0 }
-          : { year, month: month + 1 }
+          : { year, month: month + 1 },
       );
     };
 
@@ -448,22 +486,60 @@ const handleBulkCancelTickets = async () => {
     }
 
     return (
-      <div className="ticket-calendar">
-        <div className="cal-header">
-          <button className="cal-nav-btn" onClick={goToPrev}>
-            ‹
-          </button>
+      <div className="ticket-calendar enhanced-calendar">
+        <div className="calendar-top-panel">
+          <div>
+            <span className="calendar-mini-label">Ticket overview</span>
+            <h3>
+              {monthNames[month]} {year}
+            </h3>
+          </div>
 
-          <span className="cal-month-label">
-            {monthNames[month]} {year}
-          </span>
-
-          <button className="cal-nav-btn" onClick={goToNext}>
-            ›
-          </button>
+          <div className="calendar-nav-actions">
+            <button className="cal-nav-btn" onClick={goToPrev}>
+              ‹
+            </button>
+            <button className="cal-nav-btn" onClick={goToNext}>
+              ›
+            </button>
+          </div>
         </div>
 
-        <div className="cal-grid">
+        <div className="calendar-summary-grid">
+          <div className="calendar-summary-card">
+            <span>Total tickets</span>
+            <strong>{calendarSummary.total}</strong>
+          </div>
+
+          <div className="calendar-summary-card summary-active">
+            <span>Active</span>
+            <strong>{calendarSummary.active}</strong>
+          </div>
+
+          <div className="calendar-summary-card summary-expired">
+            <span>Expired</span>
+            <strong>{calendarSummary.expired}</strong>
+          </div>
+        </div>
+
+        <div className="calendar-legend">
+          <span>
+            <i className="legend-dot legend-active" />
+            Active
+          </span>
+          <span>
+            <i className="legend-dot legend-expired" />
+            Expired
+          </span>
+        </div>
+
+        <motion.div
+          key={`${year}-${month}`}
+          className="cal-grid enhanced-cal-grid"
+          initial={{ opacity: 0, y: 18, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.28, ease: "easeOut" }}
+        >
           {dayNames.map((dayName) => (
             <div key={dayName} className="cal-day-name">
               {dayName}
@@ -481,58 +557,96 @@ const handleBulkCancelTickets = async () => {
             }
 
             const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-            const hasTickets = !!ticketsByDate[dateStr];
+            const dayEntries = ticketsByDate[dateStr] || [];
+            const hasTickets = dayEntries.length > 0;
             const isToday = dateStr === todayStr;
 
+            const dayTotalTickets = dayEntries.reduce(
+              (sum, entry) => sum + (entry.totalTickets || 0),
+              0,
+            );
+
+            const dayActiveTickets = dayEntries.reduce(
+              (sum, entry) => sum + (entry.activeTickets || 0),
+              0,
+            );
+
+            const dayExpiredTickets = dayEntries.reduce(
+              (sum, entry) => sum + (entry.expiredTickets || 0),
+              0,
+            );
+
+            const dayStatusClass =
+              dayActiveTickets > 0
+                ? " cal-cell--active"
+                : dayExpiredTickets > 0
+                  ? " cal-cell--expired"
+                  : "";
+
             return (
-              <div
+              <motion.div
                 key={dateStr}
-                className={`cal-cell${hasTickets ? " cal-cell--has-tickets" : ""}${isToday ? " cal-cell--today" : ""}`}
+                className={`cal-cell${hasTickets ? " cal-cell--has-tickets" : ""}${dayStatusClass}${isToday ? " cal-cell--today" : ""}`}
                 onMouseEnter={() => hasTickets && setHoveredDay(dateStr)}
                 onMouseLeave={() => setHoveredDay(null)}
+                whileHover={hasTickets ? { y: -4, scale: 1.03 } : { y: -2 }}
+                transition={{ duration: 0.18 }}
               >
                 <span className="cal-day-num">{day}</span>
 
-                {hasTickets && hoveredDay === dateStr && (
-                  <div className="cal-tooltip" ref={tooltipRef}>
-                    <p className="cal-tooltip-date">{dateStr}</p>
-
-                    {ticketsByDate[dateStr].map((entry, i) => (
-                      <div key={i} className="cal-tooltip-entry">
-                        <span className="cal-tooltip-name">
-                          🏛 {entry.attractionName}
-                        </span>
-
-                        {entry.location && (
-                          <span className="cal-tooltip-location">
-                            📍 {entry.location}
-                          </span>
-                        )}
-
-                        <span className="cal-tooltip-count">
-                          🎫 Total: {entry.totalTickets} ticket
-                          {entry.totalTickets !== 1 ? "s" : ""}
-                        </span>
-
-                        {entry.activeTickets > 0 && (
-                          <span className="cal-tooltip-count">
-                            ✅ Active: {entry.activeTickets}
-                          </span>
-                        )}
-
-                        {entry.expiredTickets > 0 && (
-                          <span className="cal-tooltip-count expired-count">
-                            ⏳ Expired: {entry.expiredTickets}
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                {hasTickets && (
+                  <span className="cal-ticket-badge">{dayTotalTickets}</span>
                 )}
-              </div>
+
+                {hasTickets && (
+                  <span className="cal-day-status">
+                    {dayActiveTickets > 0 ? "Active" : "Expired"}
+                  </span>
+                )}
+
+                <AnimatePresence>
+                  {hasTickets && hoveredDay === dateStr && (
+                    <motion.div
+                      className="cal-tooltip enhanced-tooltip"
+                      initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                      transition={{ duration: 0.16 }}
+                    >
+                      <p className="cal-tooltip-date">{dateStr}</p>
+
+                      {dayEntries.map((entry, i) => (
+                        <div key={i} className="cal-tooltip-entry">
+                          <span className="cal-tooltip-name">
+                            🏛 {entry.attractionName}
+                          </span>
+
+                          {entry.location && (
+                            <span className="cal-tooltip-location">
+                              📍 {entry.location}
+                            </span>
+                          )}
+
+                          <div className="tooltip-count-row">
+                            <span>🎫 Total: {entry.totalTickets}</span>
+
+                            {entry.activeTickets > 0 && (
+                              <span>✅ Active: {entry.activeTickets}</span>
+                            )}
+
+                            {entry.expiredTickets > 0 && (
+                              <span>⏳ Expired: {entry.expiredTickets}</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       </div>
     );
   };
@@ -544,15 +658,18 @@ const handleBulkCancelTickets = async () => {
 
     setLoadingBarcodes((prev) => ({
       ...prev,
-      [ticketId]: true
+      [ticketId]: true,
     }));
 
     try {
-      const response = await fetch(`${API_URL}/api/Tickets/${ticketId}/barcode`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`
-        }
-      });
+      const response = await fetch(
+        `${API_URL}/api/Tickets/${ticketId}/barcode`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      );
 
       if (response.ok) {
         const blob = await response.blob();
@@ -560,7 +677,7 @@ const handleBulkCancelTickets = async () => {
 
         setBarcodes((prev) => ({
           ...prev,
-          [ticketId]: barcodeUrl
+          [ticketId]: barcodeUrl,
         }));
       }
     } catch (err) {
@@ -568,7 +685,7 @@ const handleBulkCancelTickets = async () => {
     } finally {
       setLoadingBarcodes((prev) => ({
         ...prev,
-        [ticketId]: false
+        [ticketId]: false,
       }));
     }
   };
@@ -577,7 +694,7 @@ const handleBulkCancelTickets = async () => {
     setSelectedTicketIds((prev) =>
       prev.includes(ticketId)
         ? prev.filter((id) => id !== ticketId)
-        : [...prev, ticketId]
+        : [...prev, ticketId],
     );
   };
 
@@ -599,7 +716,6 @@ const handleBulkCancelTickets = async () => {
       transition={{ duration: 0.45, ease: "easeOut" }}
       whileHover={{ y: -6 }}
     >
-
       {!expired && (
         <label className="ticket-select-box">
           <input
@@ -628,9 +744,15 @@ const handleBulkCancelTickets = async () => {
         </div>
 
         <div className="ticket-details-grid">
-          <p><strong>Entry date:</strong> {ticket.entryDate}</p>
-          <p><strong>Purchase date:</strong> {ticket.dateOfPurchase}</p>
-          <p><strong>Price:</strong> {ticket.pricePerTicket} RON</p>
+          <p>
+            <strong>Entry date:</strong> {ticket.entryDate}
+          </p>
+          <p>
+            <strong>Purchase date:</strong> {ticket.dateOfPurchase}
+          </p>
+          <p>
+            <strong>Price:</strong> {ticket.pricePerTicket} RON
+          </p>
         </div>
 
         <p className="ticket-code">
@@ -651,7 +773,9 @@ const handleBulkCancelTickets = async () => {
               onClick={() => loadBarcode(ticket.id)}
               disabled={loadingBarcodes[ticket.id]}
             >
-              {loadingBarcodes[ticket.id] ? "Loading barcode..." : "Show barcode"}
+              {loadingBarcodes[ticket.id]
+                ? "Loading barcode..."
+                : "Show barcode"}
             </button>
           )}
 
@@ -696,7 +820,8 @@ const handleBulkCancelTickets = async () => {
           <span className="profile-kicker">Account center</span>
           <h1 className="profile-title">My Profile</h1>
           <p>
-            Manage your personal data, password and purchased tickets in one place.
+            Manage your personal data, password and purchased tickets in one
+            place.
           </p>
         </motion.div>
 
@@ -715,15 +840,26 @@ const handleBulkCancelTickets = async () => {
           </div>
 
           {profileMessage.text && (
-            <p className={profileMessage.success ? "profile-msg-success" : "profile-msg-error"}>
+            <p
+              className={
+                profileMessage.success
+                  ? "profile-msg-success"
+                  : "profile-msg-error"
+              }
+            >
               {profileMessage.text}
             </p>
           )}
 
           {!isEditing ? (
             <div className="profile-display">
-              <p><strong>Name:</strong> {currentUser?.name} {currentUser?.surname}</p>
-              <p><strong>Email:</strong> {currentUser?.email}</p>
+              <p>
+                <strong>Name:</strong> {currentUser?.name}{" "}
+                {currentUser?.surname}
+              </p>
+              <p>
+                <strong>Email:</strong> {currentUser?.email}
+              </p>
               <motion.button
                 className="edit-btn"
                 onClick={() => setIsEditing(true)}
@@ -799,7 +935,13 @@ const handleBulkCancelTickets = async () => {
           </div>
 
           {passwordMessage.text && (
-            <p className={passwordMessage.success ? "profile-msg-success" : "profile-msg-error"}>
+            <p
+              className={
+                passwordMessage.success
+                  ? "profile-msg-success"
+                  : "profile-msg-error"
+              }
+            >
               {passwordMessage.text}
             </p>
           )}
@@ -847,7 +989,7 @@ const handleBulkCancelTickets = async () => {
                   setPasswordData({
                     currentPassword: "",
                     newPassword: "",
-                    confirmNewPassword: ""
+                    confirmNewPassword: "",
                   });
                   setPasswordMessage({ text: "", success: false });
                 }}
@@ -872,7 +1014,9 @@ const handleBulkCancelTickets = async () => {
           </div>
 
           <p className="delete-account-warning">
-            This action is <strong>permanent and irreversible</strong>. All your data, bookings and tickets will be deleted. Active tickets will be refunded to your bank account.
+            This action is <strong>permanent and irreversible</strong>. All your
+            data, bookings and tickets will be deleted. Active tickets will be
+            refunded to your bank account.
           </p>
 
           <div className="profile-form">
@@ -911,7 +1055,6 @@ const handleBulkCancelTickets = async () => {
           </div>
         </motion.section>
 
-
         {!currentUser?.isAdmin && calendarTickets.length > 0 && (
           <motion.section
             className="profile-section"
@@ -930,191 +1073,205 @@ const handleBulkCancelTickets = async () => {
           </motion.section>
         )}
         {!currentUser?.isAdmin && (
-  <motion.section
-    className="profile-section tickets-section"
-    initial={{ opacity: 0, y: 35 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, amount: 0.2 }}
-    transition={{ duration: 0.55, delay: 0.1, ease: "easeOut" }}
-  >
-    <div className="section-title-row">
-      <div>
-        <span className="section-label">Travel wallet</span>
-        <h2>My Tickets</h2>
-      </div>
-
-      {activeTickets.length > 0 && (
-        <div className="bulk-ticket-actions">
-          <button
-            type="button"
-            className="secondary-action-btn"
-            onClick={selectAllLoadedActiveTickets}
+          <motion.section
+            className="profile-section tickets-section"
+            initial={{ opacity: 0, y: 35 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.55, delay: 0.1, ease: "easeOut" }}
           >
-            Select loaded active
-          </button>
+            <div className="section-title-row">
+              <div>
+                <span className="section-label">Travel wallet</span>
+                <h2>My Tickets</h2>
+              </div>
 
-          {selectedTicketIds.length > 0 && (
-            <>
-              <button
-                type="button"
-                className="secondary-action-btn"
-                onClick={clearSelectedTickets}
-              >
-                Clear selection
-              </button>
+              {activeTickets.length > 0 && (
+                <div className="bulk-ticket-actions">
+                  <button
+                    type="button"
+                    className="secondary-action-btn"
+                    onClick={selectAllLoadedActiveTickets}
+                  >
+                    Select loaded active
+                  </button>
 
-              <motion.button
-                type="button"
-                className="cancel-selected-tickets-btn"
-                onClick={() => setShowBulkCancelConfirm(true)}
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.97 }}
-              >
-                Cancel selected ({selectedTicketIds.length})
-              </motion.button>
-            </>
-          )}
-        </div>
-      )}
-    </div>
+                  {selectedTicketIds.length > 0 && (
+                    <>
+                      <button
+                        type="button"
+                        className="secondary-action-btn"
+                        onClick={clearSelectedTickets}
+                      >
+                        Clear selection
+                      </button>
 
-    <div className="tickets-scroll-list">
-      <div className="ticket-group">
-        <h3>Active tickets</h3>
+                      <motion.button
+                        type="button"
+                        className="cancel-selected-tickets-btn"
+                        onClick={() => setShowBulkCancelConfirm(true)}
+                        whileHover={{ y: -2 }}
+                        whileTap={{ scale: 0.97 }}
+                      >
+                        Cancel selected ({selectedTicketIds.length})
+                      </motion.button>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
 
-        {activeTickets.length === 0 ? (
-          <p className="empty-ticket-message">No active tickets.</p>
-        ) : (
-          activeTickets.map((ticket) => (
-            <TicketCard key={ticket.id} ticket={ticket} expired={false} />
-          ))
+            <div className="tickets-scroll-list">
+              <div className="ticket-group">
+                <h3>Active tickets</h3>
+
+                {activeTickets.length === 0 ? (
+                  <p className="empty-ticket-message">No active tickets.</p>
+                ) : (
+                  activeTickets.map((ticket) => (
+                    <TicketCard
+                      key={ticket.id}
+                      ticket={ticket}
+                      expired={false}
+                    />
+                  ))
+                )}
+              </div>
+
+              <div className="ticket-group">
+                <h3>Expired tickets</h3>
+
+                {expiredTickets.length === 0 ? (
+                  <p className="empty-ticket-message">No expired tickets.</p>
+                ) : (
+                  expiredTickets.map((ticket) => (
+                    <TicketCard
+                      key={ticket.id}
+                      ticket={ticket}
+                      expired={true}
+                    />
+                  ))
+                )}
+              </div>
+
+              {loadingTickets && (
+                <p className="tickets-loading-message">Loading tickets...</p>
+              )}
+
+              {hasMoreTickets && !loadingTickets && (
+                <button
+                  type="button"
+                  className="load-more-tickets-btn"
+                  onClick={() => setTicketPage((prev) => prev + 1)}
+                >
+                  Load more tickets
+                </button>
+              )}
+
+              {!hasMoreTickets && tickets.length > 0 && (
+                <p className="tickets-end-message">All tickets are loaded.</p>
+              )}
+            </div>
+          </motion.section>
         )}
-      </div>
-
-      <div className="ticket-group">
-        <h3>Expired tickets</h3>
-
-        {expiredTickets.length === 0 ? (
-          <p className="empty-ticket-message">No expired tickets.</p>
-        ) : (
-          expiredTickets.map((ticket) => (
-            <TicketCard key={ticket.id} ticket={ticket} expired={true} />
-          ))
-        )}
-      </div>
-
-      {loadingTickets && (
-        <p className="tickets-loading-message">Loading tickets...</p>
-      )}
-
-      {hasMoreTickets && !loadingTickets && (
-        <button
-          type="button"
-          className="load-more-tickets-btn"
-          onClick={() => setTicketPage((prev) => prev + 1)}
-        >
-          Load more tickets
-        </button>
-      )}
-
-      {!hasMoreTickets && tickets.length > 0 && (
-        <p className="tickets-end-message">
-          All tickets are loaded.
-        </p>
-      )}
-    </div>
-  </motion.section>
-)}
       </div>
 
       <AnimatePresence>
-  {showBulkCancelConfirm && (
-    <motion.div
-      className="ticket-modal-overlay"
-      onClick={() => setShowBulkCancelConfirm(false)}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
-      <motion.div
-        className="ticket-modal"
-        onClick={(e) => e.stopPropagation()}
-        initial={{ opacity: 0, y: 35, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 20, scale: 0.95 }}
-        transition={{ duration: 0.25, ease: "easeOut" }}
-      >
-        <div className="ticket-modal-icon ticket-modal-icon--warn">🎫</div>
-        <h2>Cancel selected tickets?</h2>
-        <p>
-          You selected <strong>{selectedTicketIds.length}</strong> active ticket
-          {selectedTicketIds.length !== 1 ? "s" : ""}. This action cannot be undone.
-        </p>
-
-        <div className="ticket-modal-actions">
-          <button
-            className="secondary-action-btn"
+        {showBulkCancelConfirm && (
+          <motion.div
+            className="ticket-modal-overlay"
             onClick={() => setShowBulkCancelConfirm(false)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
           >
-            No, keep tickets
-          </button>
+            <motion.div
+              className="ticket-modal"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, y: 35, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+            >
+              <div className="ticket-modal-icon ticket-modal-icon--warn">
+                🎫
+              </div>
+              <h2>Cancel selected tickets?</h2>
+              <p>
+                You selected <strong>{selectedTicketIds.length}</strong> active
+                ticket
+                {selectedTicketIds.length !== 1 ? "s" : ""}. This action cannot
+                be undone.
+              </p>
 
-          <motion.button
-            className="delete-ticket-btn"
-            onClick={handleBulkCancelTickets}
-            whileHover={{ y: -2 }}
-            whileTap={{ scale: 0.97 }}
-          >
-            Yes, cancel selected
-          </motion.button>
-        </div>
-      </motion.div>
-    </motion.div>
-  )}
-</AnimatePresence>
+              <div className="ticket-modal-actions">
+                <button
+                  className="secondary-action-btn"
+                  onClick={() => setShowBulkCancelConfirm(false)}
+                >
+                  No, keep tickets
+                </button>
 
-{/* POPUP SUCCES BULK CANCEL */}
-<AnimatePresence>
-  {showBulkCancelSuccess && (
-    <motion.div
-      className="ticket-modal-overlay"
-      onClick={() => setShowBulkCancelSuccess(false)}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
-      <motion.div
-        className="ticket-modal"
-        onClick={(e) => e.stopPropagation()}
-        initial={{ opacity: 0, y: 35, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 20, scale: 0.95 }}
-        transition={{ duration: 0.25, ease: "easeOut" }}
-      >
-        <div className="ticket-modal-icon ticket-modal-icon--success">✓</div>
-        <h2>Selected tickets cancelled!</h2>
-        <p>
-          {bulkCancelCount} ticket{bulkCancelCount !== 1 ? "s" : ""} have been cancelled.
-        </p>
-
-        {bulkCancelRefund > 0 && (
-          <p className="ticket-refund-note">
-            💳 A total of <strong>{bulkCancelRefund} RON</strong> will be refunded within 3–5 business days.
-          </p>
+                <motion.button
+                  className="delete-ticket-btn"
+                  onClick={handleBulkCancelTickets}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  Yes, cancel selected
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
+      </AnimatePresence>
 
-        <motion.button
-          className="primary-action-btn"
-          onClick={() => setShowBulkCancelSuccess(false)}
-          whileHover={{ y: -2 }}
-          whileTap={{ scale: 0.97 }}
-        >
-          Got it
-        </motion.button>
-      </motion.div>
-    </motion.div>
-  )}
-</AnimatePresence>
+      {/* POPUP SUCCES BULK CANCEL */}
+      <AnimatePresence>
+        {showBulkCancelSuccess && (
+          <motion.div
+            className="ticket-modal-overlay"
+            onClick={() => setShowBulkCancelSuccess(false)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="ticket-modal"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, y: 35, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+            >
+              <div className="ticket-modal-icon ticket-modal-icon--success">
+                ✓
+              </div>
+              <h2>Selected tickets cancelled!</h2>
+              <p>
+                {bulkCancelCount} ticket{bulkCancelCount !== 1 ? "s" : ""} have
+                been cancelled.
+              </p>
+
+              {bulkCancelRefund > 0 && (
+                <p className="ticket-refund-note">
+                  💳 A total of <strong>{bulkCancelRefund} RON</strong> will be
+                  refunded within 3–5 business days.
+                </p>
+              )}
+
+              <motion.button
+                className="primary-action-btn"
+                onClick={() => setShowBulkCancelSuccess(false)}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.97 }}
+              >
+                Got it
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* MODAL CONFIRMARE STERGERE CONT */}
       <AnimatePresence>
@@ -1134,10 +1291,14 @@ const handleBulkCancelTickets = async () => {
               exit={{ opacity: 0, y: 20, scale: 0.95 }}
               transition={{ duration: 0.25, ease: "easeOut" }}
             >
-              <div className="ticket-modal-icon ticket-modal-icon--danger">⚠️</div>
+              <div className="ticket-modal-icon ticket-modal-icon--danger">
+                ⚠️
+              </div>
               <h2>Delete your account?</h2>
               <p>
-                Are you absolutely sure? This will permanently delete your account, all your bookings and tickets. <strong>This cannot be undone.</strong>
+                Are you absolutely sure? This will permanently delete your
+                account, all your bookings and tickets.{" "}
+                <strong>This cannot be undone.</strong>
               </p>
               <div className="ticket-modal-actions">
                 <button
@@ -1176,12 +1337,19 @@ const handleBulkCancelTickets = async () => {
               exit={{ opacity: 0, y: 20, scale: 0.95 }}
               transition={{ duration: 0.25, ease: "easeOut" }}
             >
-              <div className="ticket-modal-icon ticket-modal-icon--success">✓</div>
+              <div className="ticket-modal-icon ticket-modal-icon--success">
+                ✓
+              </div>
               <h2>Account deleted</h2>
-              <p>Your account and all associated data have been permanently deleted.</p>
+              <p>
+                Your account and all associated data have been permanently
+                deleted.
+              </p>
               {deleteRefundAmount > 0 && (
                 <p className="ticket-refund-note">
-                  💳 A total of <strong>{deleteRefundAmount} RON</strong> will be refunded to your bank account within 3–5 business days for your active tickets.
+                  💳 A total of <strong>{deleteRefundAmount} RON</strong> will
+                  be refunded to your bank account within 3–5 business days for
+                  your active tickets.
                 </p>
               )}
               <motion.button
@@ -1215,7 +1383,9 @@ const handleBulkCancelTickets = async () => {
               exit={{ opacity: 0, y: 20, scale: 0.95 }}
               transition={{ duration: 0.25, ease: "easeOut" }}
             >
-              <div className="ticket-modal-icon ticket-modal-icon--warn">🎫</div>
+              <div className="ticket-modal-icon ticket-modal-icon--warn">
+                🎫
+              </div>
               <h2>Cancel your ticket?</h2>
               <p>
                 Are you sure you want to cancel the ticket for{" "}
@@ -1263,13 +1433,17 @@ const handleBulkCancelTickets = async () => {
               exit={{ opacity: 0, y: 20, scale: 0.95 }}
               transition={{ duration: 0.25, ease: "easeOut" }}
             >
-              <div className="ticket-modal-icon ticket-modal-icon--success">✓</div>
+              <div className="ticket-modal-icon ticket-modal-icon--success">
+                ✓
+              </div>
               <h2>Ticket cancelled!</h2>
               <p>
-                Your ticket for <strong>{canceledTicketName}</strong> has been successfully deleted.
+                Your ticket for <strong>{canceledTicketName}</strong> has been
+                successfully deleted.
               </p>
               <p className="ticket-refund-note">
-                💳 The amount of <strong>{canceledTicketPrice} RON</strong> will be refunded to your bank account within 3–5 business days.
+                💳 The amount of <strong>{canceledTicketPrice} RON</strong> will
+                be refunded to your bank account within 3–5 business days.
               </p>
               <motion.button
                 className="primary-action-btn"
