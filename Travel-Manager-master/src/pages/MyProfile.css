@@ -771,3 +771,76 @@
   color: #60a5fa;
   font-weight: 600;
 }
+
+/* ==============================
+   PAGINATED TICKETS LIST
+   ============================== */
+
+.tickets-scroll-list {
+  max-height: 720px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.tickets-scroll-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tickets-scroll-list::-webkit-scrollbar-track {
+  border-radius: 12px;
+  background: rgba(226, 232, 240, 0.8);
+}
+
+.tickets-scroll-list::-webkit-scrollbar-thumb {
+  border-radius: 12px;
+  background: rgba(37, 99, 235, 0.45);
+}
+
+.tickets-scroll-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(37, 99, 235, 0.7);
+}
+
+.show-barcode-btn {
+  padding: 10px 16px;
+  border: 1.5px solid rgba(37, 99, 235, 0.28);
+  border-radius: 12px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s, box-shadow 0.18s;
+}
+
+.show-barcode-btn:hover:not(:disabled) {
+  background: #dbeafe;
+  border-color: rgba(37, 99, 235, 0.55);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.16);
+}
+
+.show-barcode-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.load-more-tickets-btn {
+  width: 100%;
+  margin-top: 18px;
+  padding: 13px 18px;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #1d4ed8, #0284c7);
+  color: white;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 14px 32px rgba(37, 99, 235, 0.22);
+}
+
+.tickets-loading-message,
+.tickets-end-message {
+  text-align: center;
+  color: #64748b;
+  font-weight: 800;
+  margin: 18px 0 0;
+}

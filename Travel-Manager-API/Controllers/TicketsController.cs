@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Travel_Manager_API.Controllers
 {
@@ -73,23 +75,43 @@ namespace Travel_Manager_API.Controllers
             return Ok(new { message = "Tickets purchased successfully!", bookingId = booking.Id });
         }
 
-        // GET: api/Tickets/my-tickets
-        // Returneaza toate biletele utilizatorului logat,
-        // impreuna cu imaginea atractiei, data intrarii si data cumpararii
+        // GET: api/Tickets/my-tickets?page=1&pageSize=10
+        // Returneaza biletele utilizatorului logat paginat,
+        // ca frontend-ul sa nu incarce toate biletele deodata.
         [HttpGet("my-tickets")]
         [Authorize]
-        public async Task<IActionResult> GetMyTickets()
+        public async Task<IActionResult> GetMyTickets(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
         {
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? User.FindFirstValue("sub");
+
             if (!int.TryParse(userIdStr, out int userId))
                 return Unauthorized("Invalid token.");
 
-            var tickets = await _context.Tickets
+            if (page < 1)
+                page = 1;
+
+            if (pageSize < 1)
+                pageSize = 10;
+
+            if (pageSize > 20)
+                pageSize = 20;
+
+            var query = _context.Tickets
                 .Include(t => t.Booking)
                 .Include(t => t.Attraction)
                     .ThenInclude(a => a.Images)
                 .Where(t => t.Booking.UserId == userId)
                 .OrderByDescending(t => t.Booking.DateOfPurchase)
+                .ThenByDescending(t => t.Id);
+
+            var totalCount = await query.CountAsync();
+
+            var tickets = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .Select(t => new
                 {
                     t.Id,
@@ -105,7 +127,14 @@ namespace Travel_Manager_API.Controllers
                 })
                 .ToListAsync();
 
-            return Ok(tickets);
+            return Ok(new
+            {
+                items = tickets,
+                page,
+                pageSize,
+                totalCount,
+                totalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            });
         }
 
         // GET: api/Tickets/{id}/barcode

@@ -10,8 +10,16 @@ function MyProfile() {
   const [currentUser, setCurrentUser] = useState(getCurrentUser());
   const [isEditing, setIsEditing] = useState(false);
 
+  const TICKETS_PAGE_SIZE = 10;
+
   const [tickets, setTickets] = useState([]);
+  const [ticketPage, setTicketPage] = useState(1);
+  const [totalTicketPages, setTotalTicketPages] = useState(1);
+  const [hasMoreTickets, setHasMoreTickets] = useState(true);
+  const [loadingTickets, setLoadingTickets] = useState(false);
+
   const [barcodes, setBarcodes] = useState({});
+  const [loadingBarcodes, setLoadingBarcodes] = useState({});
 
   // Cancel ticket states
   const [cancelTicketId, setCancelTicketId] = useState(null);
@@ -67,52 +75,49 @@ function MyProfile() {
 
     if (currentUser?.isAdmin) {
       setTickets([]);
+      setHasMoreTickets(false);
       return;
     }
 
     const fetchTickets = async () => {
-      const response = await fetch(`${API_URL}/api/Tickets/my-tickets`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`
-        }
-      });
+      setLoadingTickets(true);
 
-      if (response.ok) {
-        const data = await response.json();
-        setTickets(data);
+      try {
+        const response = await fetch(
+          `${API_URL}/api/Tickets/my-tickets?page=${ticketPage}&pageSize=${TICKETS_PAGE_SIZE}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`
+            }
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+
+          setTickets((prev) => {
+            const existingIds = new Set(prev.map((ticket) => ticket.id));
+            const newItems = (data.items || []).filter(
+              (ticket) => !existingIds.has(ticket.id)
+            );
+
+            return [...prev, ...newItems];
+          });
+
+          setTotalTicketPages(data.totalPages || 1);
+          setHasMoreTickets(ticketPage < (data.totalPages || 1));
+        }
+      } catch (err) {
+        console.error("Error loading tickets:", err);
+      } finally {
+        setLoadingTickets(false);
       }
     };
 
     fetchTickets();
-  }, [navigate, currentUser]);
+  }, [navigate, currentUser, ticketPage]);
 
-  useEffect(() => {
-    if (tickets.length === 0) return;
-
-    const fetchBarcodes = async () => {
-      const token = localStorage.getItem("token");
-      const barcodeMap = {};
-
-      for (const ticket of tickets) {
-        try {
-          const res = await fetch(`${API_URL}/api/Tickets/${ticket.id}/barcode`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-
-          if (res.ok) {
-            const blob = await res.blob();
-            barcodeMap[ticket.id] = URL.createObjectURL(blob);
-          }
-        } catch (err) {
-          console.error(`Error loading barcode for ticket ${ticket.id}:`, err);
-        }
-      }
-
-      setBarcodes(barcodeMap);
-    };
-
-    fetchBarcodes();
-  }, [tickets]);
+  //am sters useeffect ...  if (tickets.length === 0) return;
 
   const today = new Date().toISOString().split("T")[0];
   const activeTickets = tickets.filter((ticket) => ticket.entryDate >= today);
@@ -221,6 +226,8 @@ function MyProfile() {
       console.error("Error canceling ticket:", err);
     }
   };
+
+
 
   // Delete account handler
   const handleDeleteAccount = async () => {
@@ -357,6 +364,42 @@ function MyProfile() {
     );
   };
 
+  const loadBarcode = async (ticketId) => {
+    if (barcodes[ticketId] || loadingBarcodes[ticketId]) {
+      return;
+    }
+
+    setLoadingBarcodes((prev) => ({
+      ...prev,
+      [ticketId]: true
+    }));
+
+    try {
+      const response = await fetch(`${API_URL}/api/Tickets/${ticketId}/barcode`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const barcodeUrl = URL.createObjectURL(blob);
+
+        setBarcodes((prev) => ({
+          ...prev,
+          [ticketId]: barcodeUrl
+        }));
+      }
+    } catch (err) {
+      console.error(`Error loading barcode for ticket ${ticketId}:`, err);
+    } finally {
+      setLoadingBarcodes((prev) => ({
+        ...prev,
+        [ticketId]: false
+      }));
+    }
+  };
+
   const TicketCard = ({ ticket, expired }) => (
     <motion.div
       className={`ticket-card${expired ? " expired" : ""}`}
@@ -400,7 +443,14 @@ function MyProfile() {
               className="ticket-barcode"
             />
           ) : (
-            <p className="ticket-barcode-loading">Loading barcode...</p>
+            <button
+              type="button"
+              className="show-barcode-btn"
+              onClick={() => loadBarcode(ticket.id)}
+              disabled={loadingBarcodes[ticket.id]}
+            >
+              {loadingBarcodes[ticket.id] ? "Loading barcode..." : "Show barcode"}
+            </button>
           )}
 
           {!expired && (
@@ -715,6 +765,26 @@ function MyProfile() {
                 ))
               )}
             </div>
+
+            {loadingTickets && (
+                <p className="tickets-loading-message">Loading tickets...</p>
+              )}
+
+              {hasMoreTickets && !loadingTickets && (
+                <button
+                  type="button"
+                  className="load-more-tickets-btn"
+                  onClick={() => setTicketPage((prev) => prev + 1)}
+                >
+                  Load more tickets
+                </button>
+              )}
+
+              {!hasMoreTickets && tickets.length > 0 && (
+                <p className="tickets-end-message">
+                  All tickets are loaded.
+                </p>
+              )}
           </motion.section>
         )}
       </div>
