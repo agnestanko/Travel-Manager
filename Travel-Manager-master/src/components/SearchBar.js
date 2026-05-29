@@ -12,7 +12,7 @@ function SearchBar({ setResults }) {
   const [type, setType] = useState(searchParams.get("type") || "");
   const [sort, setSort] = useState(searchParams.get("sort") || "none");
   const [showFilter, setShowFilter] = useState(false);
-  const types = ["Istoric", "Natură", "Relaxare", "Distracție"];
+  const types = ["Historical", "Nature", "Relaxation", "Entertainment"];
 
   const hasActiveFilters =
     query.trim() !== "" ||

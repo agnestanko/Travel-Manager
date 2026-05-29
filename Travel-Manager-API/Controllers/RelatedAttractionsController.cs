@@ -15,12 +15,20 @@ namespace Travel_Manager_API.Controllers
             _context = context;
         }
 
-        // GET: api/relatedattractions/3?count=3
+        // GET: api/relatedattractions/{id}?count=3
+        // Returneaza atractii de acelasi tip, exclus atractia curenta
         [HttpGet("{id}")]
         public async Task<ActionResult<IEnumerable<object>>> GetRelated(int id, [FromQuery] int count = 3)
         {
+            // Gasim tipul atractiei curente
+            var currentType = await _context.Attractions
+                .Where(a => a.Id == id)
+                .Select(a => a.Type)
+                .FirstOrDefaultAsync();
+
+            // Filtram dupa acelasi tip, excludem atractia curenta, ordine aleatoare
             var related = await _context.Attractions
-                .Where(a => a.Id != id)
+                .Where(a => a.Id != id && a.Type == currentType)
                 .OrderBy(a => Guid.NewGuid())
                 .Take(count)
                 .Include(a => a.Images)

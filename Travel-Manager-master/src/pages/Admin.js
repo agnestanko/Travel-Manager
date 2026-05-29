@@ -362,10 +362,10 @@ function Admin() {
                     <label>Type</label>
                     <select name="type" value={form.type} onChange={handleChange} required>
                       <option value="">Select type</option>
-                      <option value="Istoric">Istoric</option>
-                      <option value="Natură">Natură</option>
-                      <option value="Relaxare">Relaxare</option>
-                      <option value="Distracție">Distracție</option>
+                      <option value="Historical">Historical</option>
+                      <option value="Nature">Nature</option>
+                      <option value="Relaxation">Relaxation</option>
+                      <option value="Entertainment">Entertainment</option>
                     </select>
                   </div>
                   <div className="admin-field admin-field-full">

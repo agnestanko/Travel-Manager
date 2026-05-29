@@ -16,6 +16,7 @@ namespace Travel_Manager_API.Controllers
         }
 
         // GET: api/home
+        // Returneaza toate atractiile (frontend le va afisa in ordine aleatoare)
         [HttpGet]
         public async Task<ActionResult<IEnumerable<object>>> GetHomeData()
         {
@@ -32,6 +33,32 @@ namespace Travel_Manager_API.Controllers
                 .ToListAsync();
 
             return Ok(attractions);
+        }
+
+        // GET: api/home/popular
+        // Returneaza atractiile sortate descrescator dupa numarul de bilete vandute azi
+        [HttpGet("popular")]
+        public async Task<ActionResult<IEnumerable<object>>> GetPopular()
+        {
+            var today = DateOnly.FromDateTime(DateTime.Today);
+
+            var popular = await _context.Attractions
+                .Include(a => a.Images)
+                .Select(a => new
+                {
+                    a.Id,
+                    a.Name,
+                    FirstImage = a.Images.Any()
+                        ? a.Images.First().ImagePath
+                        : null,
+                    TicketsSoldToday = _context.Tickets
+                        .Count(t => t.AttractionId == a.Id && t.EntryDate == today)
+                })
+                .OrderByDescending(a => a.TicketsSoldToday)
+                .Take(8)
+                .ToListAsync();
+
+            return Ok(popular);
         }
     }
 }

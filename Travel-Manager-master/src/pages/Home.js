@@ -9,7 +9,7 @@ import "./Home.css";
 
 function Home() {
   const [results, setResults] = useState([]);
-  const [gallery, setGallery] = useState([]);
+  const [popular, setPopular] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const galleryRef = useRef(null);
@@ -38,17 +38,25 @@ function Home() {
   };
 
   useEffect(() => {
-    const fetchGallery = async () => {
+    const fetchAll = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_URL}/api/home`);
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch attractions");
-        }
+        // Ambele fetch-uri simultan
+        const [searchRes, popularRes] = await Promise.all([
+          fetch(`${API_URL}/api/Search`),
+          fetch(`${API_URL}/api/home/popular`)
+        ]);
 
-        const data = await response.json();
-        setGallery(data);
+        if (!searchRes.ok) throw new Error("Failed to fetch attractions");
+
+        const [searchData, popularData] = await Promise.all([
+          searchRes.json(),
+          popularRes.ok ? popularRes.json() : Promise.resolve([])
+        ]);
+
+        setResults(searchData);
+        setPopular(popularData);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -56,7 +64,7 @@ function Home() {
       }
     };
 
-    fetchGallery();
+    fetchAll();
   }, []);
 
   return (
@@ -126,7 +134,7 @@ function Home() {
           </button>
 
           <div className="home-gallery-grid" ref={galleryRef}>
-            {gallery.slice(0, 8).map((item, index) => (
+            {popular.slice(0, 8).map((item, index) => (
               <motion.div
                 className="home-gallery-card"
                 key={item.id}
