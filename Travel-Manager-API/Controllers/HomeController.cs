@@ -36,7 +36,7 @@ namespace Travel_Manager_API.Controllers
         }
 
         // GET: api/home/popular
-        // Returneaza atractiile sortate descrescator dupa numarul de bilete vandute azi
+        // Returneaza atractiile sortate dupa numarul de bilete cumparate azi
         [HttpGet("popular")]
         public async Task<ActionResult<IEnumerable<object>>> GetPopular()
         {
@@ -52,9 +52,11 @@ namespace Travel_Manager_API.Controllers
                         ? a.Images.First().ImagePath
                         : null,
                     TicketsSoldToday = _context.Tickets
-                        .Count(t => t.AttractionId == a.Id && t.EntryDate == today)
+                        .Count(t => t.AttractionId == a.Id &&
+                                    t.Booking.DateOfPurchase == today)
                 })
                 .OrderByDescending(a => a.TicketsSoldToday)
+                .ThenBy(a => a.Name)
                 .Take(8)
                 .ToListAsync();
 
