@@ -7,6 +7,9 @@ import { API_URL } from "../services/api";
 function SearchBar({ setResults }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("query") || "");
+  const [debouncedQuery, setDebouncedQuery] = useState(
+    searchParams.get("query") || "",
+  );
   const [minPrice, setMinPrice] = useState(searchParams.get("minPrice") || "");
   const [maxPrice, setMaxPrice] = useState(searchParams.get("maxPrice") || "");
   const [type, setType] = useState(searchParams.get("type") || "");
@@ -22,19 +25,48 @@ function SearchBar({ setResults }) {
     sort !== "none";
 
   useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 600);
+
+    return () => clearTimeout(timeoutId);
+  }, [query]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
     const fetchResults = async () => {
       try {
         const params = new URLSearchParams();
 
-        if (query.trim() !== "") params.append("query", query);
-        if (minPrice !== "") params.append("minPrice", minPrice);
-        if (maxPrice !== "") params.append("maxPrice", maxPrice);
-        if (type !== "") params.append("type", type);
-        if (sort !== "none") params.append("sort", sort);
+        if (debouncedQuery.trim() !== "") {
+          params.append("query", debouncedQuery.trim());
+        }
+
+        if (minPrice !== "") {
+          params.append("minPrice", minPrice);
+        }
+
+        if (maxPrice !== "") {
+          params.append("maxPrice", maxPrice);
+        }
+
+        if (type !== "") {
+          params.append("type", type);
+        }
+
+        if (sort !== "none") {
+          params.append("sort", sort);
+        }
 
         setSearchParams(params, { replace: true });
 
-        const response = await fetch(`${API_URL}/api/Search?${params.toString()}`);
+        const response = await fetch(
+          `${API_URL}/api/Search?${params.toString()}`,
+          {
+            signal: controller.signal,
+          },
+        );
 
         if (!response.ok) {
           throw new Error("API error");
@@ -43,13 +75,27 @@ function SearchBar({ setResults }) {
         const data = await response.json();
         setResults(data);
       } catch (error) {
+        if (error.name === "AbortError") {
+          return;
+        }
+
         console.error("Eroare la fetch:", error);
         setResults([]);
       }
     };
 
     fetchResults();
-  }, [query, minPrice, maxPrice, type, sort, setResults, setSearchParams]);
+
+    return () => controller.abort();
+  }, [
+    debouncedQuery,
+    minPrice,
+    maxPrice,
+    type,
+    sort,
+    setResults,
+    setSearchParams,
+  ]);
 
   const toggleSort = () => {
     if (sort === "none" || sort === "desc") setSort("asc");
