@@ -14,6 +14,17 @@ function Home() {
   const [error, setError] = useState(null);
   const galleryRef = useRef(null);
 
+  const [shouldAnimateHome] = useState(() => {
+    const alreadyAnimated = sessionStorage.getItem("homeAnimated");
+
+    if (alreadyAnimated) {
+      return false;
+    }
+
+    sessionStorage.setItem("homeAnimated", "true");
+    return true;
+  });
+
   const navigate = useNavigate();
 
   const buildImageUrl = (path) => {
@@ -45,14 +56,14 @@ function Home() {
         // Ambele fetch-uri simultan
         const [searchRes, popularRes] = await Promise.all([
           fetch(`${API_URL}/api/Search`),
-          fetch(`${API_URL}/api/home/popular`)
+          fetch(`${API_URL}/api/home/popular`),
         ]);
 
         if (!searchRes.ok) throw new Error("Failed to fetch attractions");
 
         const [searchData, popularData] = await Promise.all([
           searchRes.json(),
-          popularRes.ok ? popularRes.json() : Promise.resolve([])
+          popularRes.ok ? popularRes.json() : Promise.resolve([]),
         ]);
 
         setResults(searchData);
@@ -75,32 +86,44 @@ function Home() {
 
         <motion.div
           className="home-hero-content"
-          initial={{ opacity: 0, y: 35 }}
+          initial={shouldAnimateHome ? { opacity: 0, y: 35 } : false}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.75, ease: "easeOut" }}
+          transition={{
+            duration: shouldAnimateHome ? 0.75 : 0,
+            ease: "easeOut",
+          }}
         >
           <motion.p
             className="hero-kicker"
-            initial={{ opacity: 0, y: 18 }}
+            initial={shouldAnimateHome ? { opacity: 0, y: 18 } : false}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15, duration: 0.6 }}
+            transition={{
+              delay: shouldAnimateHome ? 0.15 : 0,
+              duration: shouldAnimateHome ? 0.6 : 0,
+            }}
           >
             Discover. Plan. Travel.
           </motion.p>
 
           <motion.h1
-            initial={{ opacity: 0, y: 22 }}
+            initial={shouldAnimateHome ? { opacity: 0, y: 22 } : false}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25, duration: 0.7 }}
+            transition={{
+              delay: shouldAnimateHome ? 0.25 : 0,
+              duration: shouldAnimateHome ? 0.7 : 0,
+            }}
           >
             Plan less. Travel more.
           </motion.h1>
 
           <motion.p
             className="hero-description"
-            initial={{ opacity: 0, y: 22 }}
+            initial={shouldAnimateHome ? { opacity: 0, y: 22 } : false}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35, duration: 0.7 }}
+            transition={{
+              delay: shouldAnimateHome ? 0.35 : 0,
+              duration: shouldAnimateHome ? 0.7 : 0,
+            }}
           >
             Find attractions, check availability and manage your travel
             experience in one modern platform.
