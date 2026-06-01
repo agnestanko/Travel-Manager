@@ -100,13 +100,39 @@ namespace Travel_Manager_API.Controllers
         }
 
         [HttpGet("attractions")]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 10)
         {
-            var attractions = await _context.Attractions
+            if (page < 1)
+                page = 1;
+
+            if (pageSize < 1)
+                pageSize = 10;
+
+            if (pageSize > 20)
+                pageSize = 20;
+
+            var query = _context.Attractions
                 .Include(a => a.Images)
                 .Include(a => a.AvailableDates)
+                .OrderBy(a => a.Id);
+
+            var totalCount = await query.CountAsync();
+
+            var attractions = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
-            return Ok(attractions);
+
+            return Ok(new
+            {
+                items = attractions,
+                page,
+                pageSize,
+                totalCount,
+                totalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            });
         }
     }
 
