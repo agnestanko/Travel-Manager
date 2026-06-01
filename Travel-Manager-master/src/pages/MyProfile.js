@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { isLoggedIn, getCurrentUser } from "../services/authService";
@@ -732,6 +732,7 @@ function MyProfile() {
           src={buildImageUrl(ticket.firstImage)}
           alt={ticket.attractionName}
           className="ticket-image"
+          loading="lazy"
         />
       )}
 

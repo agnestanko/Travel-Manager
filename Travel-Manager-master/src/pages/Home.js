@@ -177,6 +177,7 @@ function Home() {
                         : "/placeholder.jpg"
                     }
                     alt={item.name}
+                    loading="lazy"
                   />
                 </div>
 

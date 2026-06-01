@@ -43,6 +43,7 @@ function ResultCard({ item, onClick }) {
         className="resultImage"
         src={imageUrl}
         alt={item.name}
+        loading="lazy"
         onError={(event) => {
           event.currentTarget.src = "/placeholder.jpg";
         }}

@@ -18,8 +18,18 @@ function AvailabilityCalendar({ availableDates, selectedDate, onSelectDate }) {
   const availableSet = new Set(availableDates);
 
   const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
 
   const dayNames = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
@@ -38,13 +48,17 @@ function AvailabilityCalendar({ availableDates, selectedDate, onSelectDate }) {
   const days = buildCalendarDays();
 
   const prevMonth = () => {
-    if (viewMonth === 0) { setViewMonth(11); setViewYear(viewYear - 1); }
-    else setViewMonth(viewMonth - 1);
+    if (viewMonth === 0) {
+      setViewMonth(11);
+      setViewYear(viewYear - 1);
+    } else setViewMonth(viewMonth - 1);
   };
 
   const nextMonth = () => {
-    if (viewMonth === 11) { setViewMonth(0); setViewYear(viewYear + 1); }
-    else setViewMonth(viewMonth + 1);
+    if (viewMonth === 11) {
+      setViewMonth(0);
+      setViewYear(viewYear + 1);
+    } else setViewMonth(viewMonth + 1);
   };
 
   const formatDate = (day) => {
@@ -59,7 +73,9 @@ function AvailabilityCalendar({ availableDates, selectedDate, onSelectDate }) {
         <button type="button" onClick={prevMonth}>
           &#8249;
         </button>
-        <span>{monthNames[viewMonth]} {viewYear}</span>
+        <span>
+          {monthNames[viewMonth]} {viewYear}
+        </span>
         <button type="button" onClick={nextMonth}>
           &#8250;
         </button>
@@ -80,7 +96,8 @@ function AvailabilityCalendar({ availableDates, selectedDate, onSelectDate }) {
           const dateStr = formatDate(day);
           const isAvailable = availableSet.has(dateStr);
           const isSelected = selectedDate === dateStr;
-          const past = new Date(dateStr) < new Date(today.toISOString().split("T")[0]);
+          const past =
+            new Date(dateStr) < new Date(today.toISOString().split("T")[0]);
 
           let className = "calendar-day current-month";
           if (isAvailable) className += " available";
@@ -112,7 +129,9 @@ function StarRating({ value, onChange, readOnly = false, size = "md" }) {
   const display = hovered || value;
 
   return (
-    <div className={`star-rating star-rating--${size}${readOnly ? " star-rating--readonly" : ""}`}>
+    <div
+      className={`star-rating star-rating--${size}${readOnly ? " star-rating--readonly" : ""}`}
+    >
       {[1, 2, 3, 4, 5].map((star) => (
         <span
           key={star}
@@ -148,7 +167,10 @@ function AttractionDetails() {
   const [canReview, setCanReview] = useState(false);
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewComment, setReviewComment] = useState("");
-  const [reviewMessage, setReviewMessage] = useState({ text: "", success: false });
+  const [reviewMessage, setReviewMessage] = useState({
+    text: "",
+    success: false,
+  });
   const [submittingReview, setSubmittingReview] = useState(false);
 
   const user = getCurrentUser();
@@ -157,7 +179,7 @@ function AttractionDetails() {
     fullName: user?.name || "",
     email: user?.email || "",
     tickets: 1,
-    entryDate: ""
+    entryDate: "",
   });
 
   const buildImageUrl = (path) => {
@@ -180,7 +202,7 @@ function AttractionDetails() {
 
         if (attractionData?.images?.length > 0) {
           const imageUrls = attractionData.images.map((img) =>
-            buildImageUrl(img.imagePath)
+            buildImageUrl(img.imagePath),
           );
           setImages(imageUrls);
         } else {
@@ -197,7 +219,9 @@ function AttractionDetails() {
   useEffect(() => {
     const fetchRelated = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/relatedattractions/${id}?count=3`);
+        const response = await fetch(
+          `${API_URL}/api/relatedattractions/${id}?count=3`,
+        );
 
         if (!response.ok) {
           throw new Error("Failed to fetch related");
@@ -210,7 +234,7 @@ function AttractionDetails() {
           title: item.name,
           image: item.firstImage
             ? buildImageUrl(item.firstImage)
-            : "/placeholder.jpg"
+            : "/placeholder.jpg",
         }));
 
         setRelated(items);
@@ -226,7 +250,9 @@ function AttractionDetails() {
   useEffect(() => {
     const fetchDates = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/Attraction/${id}/available-dates`);
+        const response = await fetch(
+          `${API_URL}/api/Attraction/${id}/available-dates`,
+        );
 
         if (!response.ok) {
           throw new Error("Failed to fetch dates");
@@ -250,7 +276,9 @@ function AttractionDetails() {
         const token = localStorage.getItem("token");
         if (token) headers["Authorization"] = `Bearer ${token}`;
 
-        const response = await fetch(`${API_URL}/api/Reviews/${id}`, { headers });
+        const response = await fetch(`${API_URL}/api/Reviews/${id}`, {
+          headers,
+        });
         if (response.ok) {
           const data = await response.json();
           setReviews(data.reviews ?? data);
@@ -281,7 +309,7 @@ function AttractionDetails() {
 
     setFormData({
       ...formData,
-      [name]: name === "tickets" ? Number(value) : value
+      [name]: name === "tickets" ? Number(value) : value,
     });
   };
 
@@ -312,13 +340,13 @@ function AttractionDetails() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       body: JSON.stringify({
         attractionId: Number(id),
         quantity: formData.tickets,
-        entryDate: formData.entryDate
-      })
+        entryDate: formData.entryDate,
+      }),
     });
 
     if (response.ok) {
@@ -349,9 +377,9 @@ function AttractionDetails() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify({ comment: reviewComment, rating: reviewRating })
+        body: JSON.stringify({ comment: reviewComment, rating: reviewRating }),
       });
 
       if (response.ok) {
@@ -360,10 +388,16 @@ function AttractionDetails() {
         setReviewRating(0);
         setReviewComment("");
         setCanReview(false);
-        setReviewMessage({ text: "Review submitted successfully!", success: true });
+        setReviewMessage({
+          text: "Review submitted successfully!",
+          success: true,
+        });
       } else {
         const err = await response.text();
-        setReviewMessage({ text: err.replace(/"/g, "") || "Could not submit review.", success: false });
+        setReviewMessage({
+          text: err.replace(/"/g, "") || "Could not submit review.",
+          success: false,
+        });
       }
     } catch (err) {
       setReviewMessage({ text: "An error occurred.", success: false });
@@ -376,7 +410,7 @@ function AttractionDetails() {
     try {
       const response = await fetch(`${API_URL}/api/Reviews/${reviewId}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       if (response.ok) {
         setReviews((prev) => prev.filter((r) => r.id !== reviewId));
@@ -387,7 +421,9 @@ function AttractionDetails() {
   };
 
   const avgRating = reviews.length
-    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(
+        1,
+      )
     : null;
 
   return (
@@ -406,16 +442,16 @@ function AttractionDetails() {
             hidden: {},
             visible: {
               transition: {
-                staggerChildren: 0.12
-              }
-            }
+                staggerChildren: 0.12,
+              },
+            },
           }}
         >
           <motion.div
             className="details-gallery"
             variants={{
               hidden: { opacity: 0, x: -45 },
-              visible: { opacity: 1, x: 0 }
+              visible: { opacity: 1, x: 0 },
             }}
             transition={{ duration: 0.65, ease: "easeOut" }}
           >
@@ -426,7 +462,7 @@ function AttractionDetails() {
             className="details-info"
             variants={{
               hidden: { opacity: 0, x: 45 },
-              visible: { opacity: 1, x: 0 }
+              visible: { opacity: 1, x: 0 },
             }}
             transition={{ duration: 0.65, ease: "easeOut" }}
           >
@@ -438,13 +474,9 @@ function AttractionDetails() {
 
             <h1>{attraction.name}</h1>
 
-            <p className="details-location">
-              {attraction.location}
-            </p>
+            <p className="details-location">{attraction.location}</p>
 
-            <p className="details-description">
-              {attraction.description}
-            </p>
+            <p className="details-description">{attraction.description}</p>
 
             <div className="details-price-box">
               <span>Entry price</span>
@@ -454,7 +486,11 @@ function AttractionDetails() {
             {user?.isAdmin ? (
               <motion.button
                 className="admin-manage-attraction-btn"
-                onClick={() => navigate("/admin", { state: { editAttractionId: Number(id) } })}
+                onClick={() =>
+                  navigate("/admin", {
+                    state: { editAttractionId: Number(id) },
+                  })
+                }
                 whileHover={{ y: -3, scale: 1.02 }}
                 whileTap={{ scale: 0.97 }}
               >
@@ -490,7 +526,9 @@ function AttractionDetails() {
               <div className="reviews-avg">
                 <span className="reviews-avg-score">{avgRating}</span>
                 <StarRating value={Math.round(avgRating)} readOnly size="sm" />
-                <span className="reviews-count">{reviews.length} review{reviews.length !== 1 ? "s" : ""}</span>
+                <span className="reviews-count">
+                  {reviews.length} review{reviews.length !== 1 ? "s" : ""}
+                </span>
               </div>
             )}
           </div>
@@ -503,7 +541,11 @@ function AttractionDetails() {
               transition={{ duration: 0.4 }}
             >
               <p className="review-form-label">Leave your review</p>
-              <StarRating value={reviewRating} onChange={setReviewRating} size="lg" />
+              <StarRating
+                value={reviewRating}
+                onChange={setReviewRating}
+                size="lg"
+              />
               <textarea
                 className="review-textarea"
                 placeholder="Share your experience..."
@@ -512,7 +554,13 @@ function AttractionDetails() {
                 rows={3}
               />
               {reviewMessage.text && (
-                <p className={reviewMessage.success ? "review-msg-success" : "review-msg-error"}>
+                <p
+                  className={
+                    reviewMessage.success
+                      ? "review-msg-success"
+                      : "review-msg-error"
+                  }
+                >
                   {reviewMessage.text}
                 </p>
               )}
@@ -530,14 +578,16 @@ function AttractionDetails() {
 
           {isLoggedIn() && !user?.isAdmin && !canReview && (
             <p className="review-already-done">
-              {reviews.some(r => r.userId === user?.id)
+              {reviews.some((r) => r.userId === user?.id)
                 ? "✓ You have already reviewed this attraction."
                 : "You can only review attractions you have visited."}
             </p>
           )}
 
           {reviews.length === 0 ? (
-            <p className="reviews-empty">No reviews yet. Be the first to share your experience!</p>
+            <p className="reviews-empty">
+              No reviews yet. Be the first to share your experience!
+            </p>
           ) : (
             <div className="reviews-list">
               {reviews.map((review, index) => (
@@ -605,7 +655,7 @@ function AttractionDetails() {
                 whileHover={{ y: -7, scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <img src={item.image} alt={item.title} />
+                <img src={item.image} alt={item.title} loading="lazy" />
                 <p>{item.title}</p>
               </motion.div>
             ))}
@@ -684,9 +734,7 @@ function AttractionDetails() {
                   <label>Total price</label>
                   <input value={`${totalPrice} RON`} readOnly />
 
-                  {buyError && (
-                    <p className="formHint">{buyError}</p>
-                  )}
+                  {buyError && <p className="formHint">{buyError}</p>}
 
                   <motion.button
                     type="submit"
@@ -694,7 +742,7 @@ function AttractionDetails() {
                     className="confirm-purchase-btn"
                     style={{
                       opacity: !formData.entryDate ? 0.5 : 1,
-                      cursor: !formData.entryDate ? "not-allowed" : "pointer"
+                      cursor: !formData.entryDate ? "not-allowed" : "pointer",
                     }}
                     whileHover={formData.entryDate ? { y: -2 } : {}}
                     whileTap={formData.entryDate ? { scale: 0.97 } : {}}
@@ -702,9 +750,7 @@ function AttractionDetails() {
                     Confirm purchase
                   </motion.button>
 
-                  <p className="paymentInfo">
-                    Card only payment
-                  </p>
+                  <p className="paymentInfo">Card only payment</p>
 
                   <button
                     className="cancel-btn"
