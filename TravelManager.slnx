@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Class_Library_Travel_Manager/Class_Library_Travel_Manager.csproj" />
+  <Project Path="travel-manager-api/travel-manager-api.csproj" />
+  <Project Path="TravelManager.Tests/TravelManager.Tests.csproj" />
+</Solution>
