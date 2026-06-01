@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import "./SearchBar.css";
 import { API_URL } from "../services/api";
 
-function SearchBar({ setResults }) {
+function SearchBar({ setResults, setSearchLoading }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("query") || "");
   const [debouncedQuery, setDebouncedQuery] = useState(
@@ -36,33 +36,48 @@ function SearchBar({ setResults }) {
     const controller = new AbortController();
 
     const fetchResults = async () => {
-      try {
-        const params = new URLSearchParams();
+      setSearchLoading?.(true);
 
-        if (debouncedQuery.trim() !== "") {
-          params.append("query", debouncedQuery.trim());
+      try {
+        const urlParams = new URLSearchParams();
+        const apiParams = new URLSearchParams();
+
+        const trimmedQuery = debouncedQuery.trim();
+
+        // URL params: pastram ce vede userul in pagina
+        if (query.trim() !== "") {
+          urlParams.append("query", query.trim());
         }
 
         if (minPrice !== "") {
-          params.append("minPrice", minPrice);
+          urlParams.append("minPrice", minPrice);
+          apiParams.append("minPrice", minPrice);
         }
 
         if (maxPrice !== "") {
-          params.append("maxPrice", maxPrice);
+          urlParams.append("maxPrice", maxPrice);
+          apiParams.append("maxPrice", maxPrice);
         }
 
         if (type !== "") {
-          params.append("type", type);
+          urlParams.append("type", type);
+          apiParams.append("type", type);
         }
 
         if (sort !== "none") {
-          params.append("sort", sort);
+          urlParams.append("sort", sort);
+          apiParams.append("sort", sort);
         }
 
-        setSearchParams(params, { replace: true });
+        // API params: trimitem query doar daca are minimum 3 caractere
+        if (trimmedQuery.length >= 3) {
+          apiParams.append("query", trimmedQuery);
+        }
+
+        setSearchParams(urlParams, { replace: true });
 
         const response = await fetch(
-          `${API_URL}/api/Search?${params.toString()}`,
+          `${API_URL}/api/Search?${apiParams.toString()}`,
           {
             signal: controller.signal,
           },
@@ -81,6 +96,8 @@ function SearchBar({ setResults }) {
 
         console.error("Eroare la fetch:", error);
         setResults([]);
+      } finally {
+        setSearchLoading?.(false);
       }
     };
 
@@ -88,6 +105,7 @@ function SearchBar({ setResults }) {
 
     return () => controller.abort();
   }, [
+    query,
     debouncedQuery,
     minPrice,
     maxPrice,
@@ -95,6 +113,7 @@ function SearchBar({ setResults }) {
     sort,
     setResults,
     setSearchParams,
+    setSearchLoading,
   ]);
 
   const toggleSort = () => {

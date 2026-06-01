@@ -9,6 +9,7 @@ import "./Home.css";
 
 function Home() {
   const [results, setResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
   const [popular, setPopular] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -53,21 +54,27 @@ function Home() {
       try {
         setLoading(true);
 
-        // Ambele fetch-uri simultan
-        const [searchRes, popularRes] = await Promise.all([
-          fetch(`${API_URL}/api/Search`),
-          fetch(`${API_URL}/api/home/popular`),
-        ]);
+        const hasUrlFilters = window.location.search !== "";
 
-        if (!searchRes.ok) throw new Error("Failed to fetch attractions");
+        const popularRes = await fetch(`${API_URL}/api/home/popular`);
 
-        const [searchData, popularData] = await Promise.all([
-          searchRes.json(),
-          popularRes.ok ? popularRes.json() : Promise.resolve([]),
-        ]);
+        if (popularRes.ok) {
+          const popularData = await popularRes.json();
+          setPopular(popularData);
+        }
 
-        setResults(searchData);
-        setPopular(popularData);
+        // Daca URL-ul are filtre/query, SearchBar se ocupa de rezultate.
+        // Nu mai incarcam toate atractiile peste rezultatele filtrate.
+        if (!hasUrlFilters) {
+          const searchRes = await fetch(`${API_URL}/api/Search`);
+
+          if (!searchRes.ok) {
+            throw new Error("Failed to fetch attractions");
+          }
+
+          const searchData = await searchRes.json();
+          setResults(searchData);
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -77,7 +84,6 @@ function Home() {
 
     fetchAll();
   }, []);
-
   return (
     <div className="home-page">
       <section className="home-hero">
@@ -132,8 +138,18 @@ function Home() {
       </section>
 
       <MotionSection delay={0.1} className="home-search-container">
-        <SearchBar setResults={setResults} />
-        <ResultsList results={results} />
+        <SearchBar
+          setResults={setResults}
+          setSearchLoading={setSearchLoading}
+        />
+
+        {searchLoading ? (
+          <div className="noResultsMessage">
+            <h3>Searching attractions...</h3>
+          </div>
+        ) : (
+          <ResultsList results={results} />
+        )}
       </MotionSection>
 
       <MotionSection className="home-gallery-section">
