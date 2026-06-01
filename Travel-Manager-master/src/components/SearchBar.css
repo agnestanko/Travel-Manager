@@ -170,11 +170,13 @@
 }
 
 .activeFilters {
-  display: flex;
+   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 7px 10px;
-  border-radius: 999px;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 22px;
   background: rgba(224, 247, 255, 0.85);
   color: #0369a1;
   font-size: 13px;
@@ -195,6 +197,70 @@
 .activeFilters button:hover {
   background: #0284c7;
   color: white;
+}
+
+.activeFiltersLabel {
+  margin-right: 2px;
+  color: #0369a1;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.filterChip,
+.resetAllFiltersBtn {
+  border: none;
+  border-radius: 999px;
+  padding: 7px 11px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 900;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.filterChip {
+  background: white;
+  color: #0284c7;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+}
+
+.filterChip strong {
+  margin-left: 5px;
+  color: #be123c;
+}
+
+.filterChip:hover {
+  background: #0284c7;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.filterChip:hover strong {
+  color: white;
+}
+
+.resetAllFiltersBtn {
+  background: #fff1f2;
+  color: #be123c;
+}
+
+.resetAllFiltersBtn:hover {
+  background: #be123c;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.searchHint {
+  margin: 8px auto 0;
+  padding: 8px 12px;
+  width: fit-content;
+  border-radius: 999px;
+  background: rgba(14, 165, 233, 0.1);
+  color: #0369a1;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
 }
 
 @media (max-width: 800px) {
@@ -220,4 +286,16 @@
     width: 100%;
     min-width: unset;
   }
+}
+
+.searchHint {
+  margin: 8px auto 0;
+  padding: 8px 12px;
+  width: fit-content;
+  border-radius: 999px;
+  background: rgba(14, 165, 233, 0.1);
+  color: #0369a1;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
 }

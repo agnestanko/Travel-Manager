@@ -32,6 +32,8 @@ function SearchBar({ setResults, setSearchLoading }) {
     return () => clearTimeout(timeoutId);
   }, [query]);
 
+  const isShortQuery = query.trim() !== "" && query.trim().length < 3;
+
   useEffect(() => {
     const controller = new AbortController();
 
@@ -127,6 +129,23 @@ function SearchBar({ setResults, setSearchLoading }) {
     setType("");
     setQuery("");
     setSort("none");
+  };
+
+  const clearPriceFilter = () => {
+    setMinPrice("");
+    setMaxPrice("");
+  };
+
+  const clearTypeFilter = () => {
+    setType("");
+  };
+
+  const clearSortFilter = () => {
+    setSort("none");
+  };
+
+  const clearQueryFilter = () => {
+    setQuery("");
   };
 
   return (
@@ -236,11 +255,68 @@ function SearchBar({ setResults, setSearchLoading }) {
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <span>Active search</span>
-          <button type="button" onClick={clearFilters}>
-            Reset
+          <span className="activeFiltersLabel">Active filters:</span>
+
+          {query.trim() !== "" && (
+            <button
+              type="button"
+              className="filterChip"
+              onClick={clearQueryFilter}
+            >
+              Search: {query.trim()} <strong>×</strong>
+            </button>
+          )}
+
+          {(minPrice !== "" || maxPrice !== "") && (
+            <button
+              type="button"
+              className="filterChip"
+              onClick={clearPriceFilter}
+            >
+              Price: {minPrice || "0"} - {maxPrice || "∞"} RON{" "}
+              <strong>×</strong>
+            </button>
+          )}
+
+          {type !== "" && (
+            <button
+              type="button"
+              className="filterChip"
+              onClick={clearTypeFilter}
+            >
+              Type: {type} <strong>×</strong>
+            </button>
+          )}
+
+          {sort !== "none" && (
+            <button
+              type="button"
+              className="filterChip"
+              onClick={clearSortFilter}
+            >
+              Sort: {sort === "asc" ? "Price ↑" : "Price ↓"} <strong>×</strong>
+            </button>
+          )}
+
+          <button
+            type="button"
+            className="resetAllFiltersBtn"
+            onClick={clearFilters}
+          >
+            Reset all
           </button>
         </motion.div>
+      )}
+
+      {isShortQuery && (
+        <motion.p
+          className="searchHint"
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          Type at least 3 characters to search by name. Other filters are still
+          applied.
+        </motion.p>
       )}
     </motion.div>
   );
